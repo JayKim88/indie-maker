@@ -88,11 +88,11 @@ if context_files.prd.found:
   print("Found prd-lean.md. Starting UX design for [product name].")
 else:
   ask:
-    "prd-lean.md 파일을 찾지 못했습니다.
-    다음을 알려주세요:
-    1. 제품 이름과 한 줄 설명
-    2. 핵심 기능 3가지
-    3. 타겟 유저 (구체적으로)"
+    "Could not find prd-lean.md.
+    Please tell me:
+    1. Product name and one-line description
+    2. 3 core features
+    3. Target user (be specific)"
 
 if context_files.ux.found:
   print("⚠️ ux-flow.md already exists. Shall we review and revise, or start fresh?")
@@ -126,6 +126,36 @@ Let me map [target user]'s existing mental model before designing.
 
 **⚠️ UX Assumption #1**: Target user is familiar with [product X]'s pattern.
 If they're not, the navigation architecture should be reconsidered.
+```
+
+**Mental model checkpoint** (ask after Step 1 is complete):
+
+```
+Does this analysis match your actual target user?
+
+A) Yes, this is accurate → proceed to Step 2
+B) No — tell me [the tools they actually use]
+   → update analysis, then proceed to Step 2
+C) Partially — tell me [what to correct]
+   → apply corrections, then proceed to Step 2
+
+(Do not proceed to Step 2 until A is confirmed)
+```
+
+```pseudocode
+mental_model_confirmed = false
+while NOT mental_model_confirmed:
+  answer = user_input()
+  if answer == "A":
+    mental_model_confirmed = true
+  elif answer == "B":
+    actual_tools = extract_tools(user_input)
+    re_analyze_mental_model(actual_tools)
+    // re-display updated analysis, ask again
+  elif answer == "C":
+    corrections = user_input
+    apply_corrections(corrections)
+    mental_model_confirmed = true  // partial correction accepted
 ```
 
 ---

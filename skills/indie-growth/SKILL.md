@@ -301,6 +301,115 @@ else:
 
 ---
 
+### Step 3.6: Monetization Model Audit
+
+Run this after MRR growth accounting. Check if the current revenue model is the right one — or if an additional stream should be tested.
+
+```
+## Monetization Model Audit
+
+Current model: [Freemium / Paid / Usage-based / etc. from idea-canvas.md]
+Current MRR: $[N]
+Paying customer count: [N]
+Signup → Paid conversion: [N]%
+
+---
+
+**Model fit check** (answer based on data, not assumption):
+
+1. Are users on the free plan converting at < 2%?
+   → The free plan may be too generous — feature gate more aggressively.
+   → Or the paid value prop is unclear — test explicit upgrade moment.
+
+2. Is average revenue per user (ARPU) below $[target]?
+   → Pricing may be too low. Test a 30-50% price increase on new signups.
+   → Add a higher tier to pull mid-tier conversions up via anchoring.
+
+3. Is a meaningful user segment using the product very heavily (top 10%)?
+   → Usage-based pricing or an Enterprise tier may capture more value.
+
+4. Does the product have recurring organic traffic / SEO content?
+   → Native ads or newsletter sponsorship may be viable at [N]k+ visitors/mo.
+   → Threshold: consider when monthly traffic exceeds 10,000 unique visitors.
+
+5. Is there a strong community or expert user base?
+   → Paid community membership (Slack/Discord) or job board may add a second stream.
+   → Patronage model (Patreon-style) if product has a Build-in-Public audience.
+
+---
+
+**Monetization experiments to add to ICE backlog** (pick 1-2 relevant ones):
+
+MON-A: Price increase test (new signups only)
+  Hypothesis: Raising Pro price from $[X] to $[X × 1.4] will not reduce conversion
+  rate by more than 15%, increasing ARPU by ≥20%.
+  ICE: Impact=8 / Confidence=5 / Ease=8 → Score: 7.0
+
+MON-B: Annual plan introduction
+  Hypothesis: Offering annual plan at 20% discount will achieve 10-20% take rate
+  and reduce churn by improving 12-month LTV.
+  ICE: Impact=7 / Confidence=8 / Ease=7 → Score: 7.3
+
+MON-C: Higher pricing tier (anchoring)
+  Hypothesis: Adding a "Business" tier at 3× Pro price will increase Pro conversion
+  by making Pro look like the reasonable middle option.
+  ICE: Impact=6 / Confidence=6 / Ease=8 → Score: 6.7
+
+MON-D: Lifetime Deal (LTD) — one-time offer only
+  Hypothesis: A time-limited LTD at $[150-300] will generate $[N] upfront
+  and bring in a cohort of power users who provide feedback and referrals.
+  ⚠️ Risk: sets wrong price anchor; attracts deal-seekers over ideal customers.
+  Use once, not as an ongoing model.
+  ICE: Impact=7 / Confidence=5 / Ease=6 → Score: 6.0
+
+---
+
+**Verdict** (output one of):
+✅ Current model is working — no change needed. Add MON-B to experiment backlog.
+⚠️ Conversion too low — add MON-A or MON-C to experiment backlog before acquisition scaling.
+🔴 Model mismatch detected — [specific issue]. Recommend model switch before M3.
+```
+
+```pseudocode
+// Step 3.5 diagnosis → Step 3.6 experiment selection bridge
+mrr_diagnosis = result_from_step_3_5()  // 🔴 / 🟡 / 🟢
+
+if mrr_diagnosis == "🔴 acquisition-dependent":
+  // Churn is replacing new customers — fix retention first
+  priority_experiment = "MON-B"  // Annual plan: improves 12-month LTV, reduces churn immediately
+  defer_experiment = "MON-A"     // Price increase: counterproductive when churn is the problem
+  note("""
+🔴 Diagnosis: acquisition-dependent
+Priority: MON-B (annual plan) — reduce churn first
+Defer: MON-A (price increase) — raising price before understanding churn cause is counterproductive
+  """)
+
+elif mrr_diagnosis == "🟡 early PMF signal":
+  // Expansion is starting — good time to improve ARPU
+  priority_experiment = "MON-A or MON-C"  // Price increase or anchoring tier
+  note("""
+🟡 Diagnosis: early PMF signal
+Right time for ARPU improvement: run MON-A (price increase) or MON-C (anchoring tier)
+  """)
+
+elif mrr_diagnosis == "🟢 expansion engine":
+  // Strong PLG signal — ready for enterprise/usage tier
+  note("""
+🟢 Diagnosis: expansion engine
+Add Enterprise plan or usage-based tier to RICE backlog
+Current model is working — churn is low and Expansion MRR is solid
+  """)
+
+if conversion_rate < 2% AND mrr_growth < 10%_monthly:
+  flag("Monetization bottleneck: low conversion + low growth. Audit model before scaling acquisition.")
+  add_to_ice_backlog("MON-A or MON-C — price/tier experiment")
+
+if expansion_mrr_ratio > 20%:
+  note("Strong expansion signal. Add usage-based tier or Enterprise plan to RICE backlog.")
+```
+
+---
+
 ### Step 4: Channel Selection — Bull's Eye Framework
 
 Select ONE channel to validate before expanding. Not two, not three.
@@ -840,6 +949,8 @@ Monthly check with:
 - [ ] Experiment log table initialized (ready to track results)
 - [ ] MRR growth accounting decomposed (New / Expansion / Churned / Contraction) if MRR > $0
 - [ ] Expansion MRR ratio calculated — if < 5%, PLG upgrade trigger added to experiment backlog
+- [ ] Monetization model audited — at least 1 monetization experiment added to ICE backlog
+- [ ] Pricing checked against conversion rate (< 2% conversion → price/tier experiment queued)
 
 ### Self-Assessment Block (prepend to every saved artifact)
 ---

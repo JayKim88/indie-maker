@@ -72,6 +72,22 @@ research = {
 has_research    = research.competitive.found OR research.revenue.found
 has_validation  = research.demand_validation.found
 
+// Load lessons from previous sprint (indie-retro output)
+lessons_file = Glob("**/lessons.md")
+if lessons_file.found:
+  Read(lessons_file)
+  master_pattern = extract(lessons_file.master_pattern) OR ""
+  top_principles = extract(lessons_file.principles, limit=3)
+  print("""
+Previous sprint lessons found (lessons.md):
+
+Key principles:
+[top_principles — up to 3]
+[if master_pattern] Watch for recurring pattern: [master_pattern]
+
+Applying these principles throughout this planning session.
+  """)
+
 if has_research:
   Read(research files that exist)
   research_context = extract_key_data(research files)
@@ -86,9 +102,16 @@ if has_validation:
     warn("""
 ⚠️ Demand validation returned: No Signal
 The market research suggests weak demand for this idea.
-Do you want to continue anyway, or revisit the idea first?
-A) Continue — I have additional evidence not captured in the research
-B) Pause — run /indie-market-researcher first to find a better angle
+
+3 options:
+A) Continue — you have additional evidence not captured in the research
+   (note: Kill criteria will be set conservatively)
+B) Reframe angle — same problem, different target/positioning
+   → Run `/indie-market-researcher --validate "[revised angle]"` then return here
+C) Replace idea — start over with a different concept
+   → Run `/indie-market-researcher` (discovery mode) then return here
+
+Which option do you choose?
     """)
   elif demand_verdict == "🟡 Weak Signal":
     note("⚡ Weak demand signal on file — will flag high-risk assumptions during planning.")
@@ -255,13 +278,40 @@ Examples: "I'm a domain expert in this field", "I have specific technical skills
 Last question — and the most important one.
 
 Based on D29 (1 week after launch), what numbers would make you continue?
-Think through each of these:
 
+Reference benchmarks (from indie-sprint-playbook.md):
+| Metric | Kill | Watch | Go |
+|--------|------|-------|----|
+| PH upvotes | < 50 | 50–200 | > 200 |
+| Paying customers | 0 | 1–3 | 4+ |
+| MRR | $0 | $1–$49 | $50+ |
+
+You don't have to use these numbers. Set thresholds that fit your product and market.
+
+Think through each of these:
 - PH upvotes: what minimum is acceptable?
 - Paying customers: what minimum is acceptable?
 - MRR: what minimum is acceptable?
 
 Small numbers are fine. You just need a defined threshold.
+```
+
+**Q5-Follow-up: Activation Event**
+```pseudocode
+// Ask immediately after Kill criteria are defined
+print("""
+One more thing:
+When does a user first experience the core value of this product?
+
+Examples:
+- "When they generate their first report"
+- "When they invite a teammate and receive a shared link"
+- "When their first automation run completes"
+
+This moment becomes the Activation Event.
+indie-analyst will use activation event completion rate as a supporting Kill/Go metric at D29.
+""")
+activation_event = user_input
 ```
 
 ---
@@ -412,6 +462,13 @@ Why I'm well-positioned to solve this:
 | Paying customers | 0 | [N]+ |
 | MRR | $0 | $[X]+ |
 
+## Activation Event
+[The moment a user first experiences the core value of this product — one sentence]
+
+Example: "When the user completes their first [core action]"
+
+*indie-analyst uses activation event completion rate as a supporting Kill/Go metric at D29.*
+
 ## Pivot Signals (stop immediately if detected)
 - [ ] A competitor already solves this perfectly
 - [ ] I don't actually experience this problem myself (check if applicable)
@@ -440,11 +497,11 @@ Why I'm well-positioned to solve this:
 
 ## Core Features (3 features — Must-Have only)
 
-| Priority | Feature | Description | Target Day |
-|----------|---------|-------------|------------|
-| P0 | [Feature 1] | [description] | D[X] |
-| P0 | [Feature 2] | [description] | D[X] |
-| P0 | [Feature 3] | [description] | D[X] |
+| Priority | Feature | Description | Target Day | 예상 화면 |
+|----------|---------|-------------|------------|---------|
+| P0 | [Feature 1] | [description] | D[X] | [/route 또는 modal/dialog] |
+| P0 | [Feature 2] | [description] | D[X] | [/route 또는 modal/dialog] |
+| P0 | [Feature 3] | [description] | D[X] | [/route 또는 modal/dialog] |
 
 ## Won't Have (MVP Backlog)
 - [Feature A]

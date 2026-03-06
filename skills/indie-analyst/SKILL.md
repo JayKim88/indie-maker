@@ -56,13 +56,32 @@ metadata:
 
 ```pseudocode
 context = load_context([
-  Glob("**/idea-canvas.md"),   // Kill criteria baseline
+  Glob("**/idea-canvas.md"),       // Kill criteria baseline
   Glob("**/prd-lean.md"),
+  Glob("**/launch-metrics.md"),    // Channel attribution (indie-launcher D15 output)
   "knowledge/analytics-guide.md",
 ])
 
+// Check for existing Watch verdict (D43 re-evaluation)
+watch_report = Glob("**/kill-go-report.md")
+if watch_report.found:
+  Read(kill-go-report.md)
+  prior_verdict = extract(verdict)
+  if prior_verdict == "WATCH":
+    review_date = extract(review_date)
+    d43_thresholds = extract(d43_thresholds)
+    print("""
+Prior verdict: 🟡 Watch (re-evaluation scheduled for ${review_date})
+D43 thresholds loaded:
+- Kill if: ${d43_thresholds.kill_if}
+- Go if:   ${d43_thresholds.go_if}
+
+This session is a D43 re-evaluation. Final Kill/Go verdict will be issued against these thresholds.
+    """)
+    mode = "watch_reeval"  // skip to Step 3 with loaded thresholds
+
 // Detect launch stage from context or ask
-if launch_day_known_from_context:
+if launch_day_known_from_context OR mode == "watch_reeval":
   skip_to_step_2_with_appropriate_mode()
 else:
   ask_stage_question()
@@ -254,6 +273,39 @@ Beyond numbers, a few qualitative checks:
 
 ### Step 4: Kill/Go Recommendation
 
+```pseudocode
+// Edge case handling — adjust benchmarks before applying Kill/Go logic
+
+// Sub-50 user edge case
+paying_customers = extract_from_metrics()
+if paying_customers < 50:
+  note("""
+⚠️ Under 50 paying customers — qualitative signals take priority
+
+At this stage, qualitative signals are stronger PMF indicators than quantitative ones.
+If you have Sean Ellis 40% test results, use them as the primary benchmark.
+(Question: "How disappointed would you be if this product disappeared?" → "Very disappointed" ≥ 40% = PMF signal)
+
+Quantitative Kill criteria are used as supporting signals only.
+  """)
+
+// Non-PH launch edge case
+launch_channel = extract_from_launch_metrics() OR "Product Hunt"  // default
+if launch_channel != "Product Hunt":
+  note("""
+⚠️ PH upvote benchmark not applicable
+
+This launch did not use Product Hunt as the primary channel.
+PH upvote Kill criteria will not be applied.
+
+Alternative channel signal benchmarks:
+- Cold email: reply rate > 10% = healthy
+- GitHub: weekly star growth > 20% = interest signal
+- Reddit / Show HN: comment engagement + inbound inquiries
+- Direct inbound: signups without paid acquisition = strongest signal
+  """)
+```
+
 #### Kill Recommendation
 
 ```
@@ -307,6 +359,61 @@ save_file("kill-go-report.md", {
   ltv_cac:       { ltv: "$X", cac: "$Y", ratio: "Nx" },
 })
 ```
+
+#### Watch Recommendation
+
+```
+🟡 Analysis Result: Watch — 2-week observation period
+
+Reason:
+- [Strong signal]: [Activation Event completion rate / qualitative feedback / trend direction]
+- [Weak signal]: [Kill criteria metric not yet met]
+
+Why not Kill now:
+[1-2 sentences — "X is strong but Y is still insufficient. Y can be validated within 2 weeks."]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Watch Period Action Plan (D29→D43)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+One focus for this period:
+→ [The smallest action that could improve the weak signal]
+Example: "Send usage-limit notification email to free users → test conversion pressure"
+
+D43 decision thresholds (defined now):
+| Metric | Watch → Kill | Watch → Go |
+|--------|-------------|-----------|
+| [Metric 1] | < [N] | [N]+ |
+| [Metric 2] | < [N] | [N]+ |
+
+Re-run `/indie-analyst` at D43 with these thresholds.
+```
+
+```pseudocode
+// Save Watch report
+save_file("kill-go-report.md", {
+  verdict:        "WATCH",
+  product:        product_name,
+  date:           D29,
+  review_date:    D29 + 14,  // D43
+  strong_signals: [strong_signal_1],
+  weak_signals:   [weak_signal_1],
+  watch_action:   single_focus_action,
+  d43_thresholds: {
+    kill_if: { metric_1: "< N", metric_2: "< N" },
+    go_if:   { metric_1: "N+", metric_2: "N+" },
+  },
+  aarrr_summary:  { /* same schema as Kill/Go */ },
+})
+
+print("""
+→ Re-run `/indie-analyst` at D43.
+  On re-run, kill-go-report.md (Watch verdict) will be auto-loaded
+  and a final Kill or Go verdict will be issued against the D43 thresholds.
+""")
+```
+
+---
 
 #### Go Recommendation
 

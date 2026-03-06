@@ -102,7 +102,25 @@ if product_type not in context:
     B) Team SaaS (B2B) — organization/team with roles (multi-tenancy)
     C) Marketplace — buyers + sellers, transactions
     D) Content Platform — creators + viewers, public/private content
-    E) Dev Tool / API — API key auth, usage quotas"
+    E) Dev Tool / API — API key auth, usage quotas
+    F) Other — VS Code Extension / CLI / Mobile / Desktop app"
+
+// Non-SaaS stack mismatch detection
+if product_type == "F" OR product_type inferred as non-web:
+  warn("""
+⚠️ Potential stack mismatch
+
+indie-backend (Axel) is optimized for the Supabase + Next.js + Stripe web SaaS stack.
+
+Limitations by product type:
+- VS Code Extension: Extension API-based — no Next.js server needed; Supabase useful for usage tracking only
+- CLI Tool: Node.js package distribution — Stripe webhooks work fine; consider file-based DB alternatives
+- Mobile App (React Native): Supabase client is supported; RLS patterns apply identically
+- Desktop App (Electron): Web API patterns are similar; offline sync requires separate consideration
+
+Axel will adapt advice to your product type if you continue.
+If you need a completely different stack, asking Claude Code directly may be more efficient.
+  """)
 
 request_type = classify(user_input) → one_of:
   "db_schema"         // DB table design
@@ -127,6 +145,47 @@ request_type = classify(user_input) → one_of:
   "observability"     // Structured logging, uptime, metrics
   "local_dev"         // Supabase local stack, seed data, dev workflow
   "question"          // Concept/architecture question
+```
+
+**Request Routing Dispatch:**
+
+```pseudocode
+dispatch(request_type):
+  "db_schema"      → Step 2 (DB Schema Design) below
+  "rls_policy"     → Apply RLS pattern library:
+                     - Row-level: SELECT/INSERT/UPDATE/DELETE per role
+                     - Column-level: security definer view + column masking
+                     - Reference: knowledge/backend-guide.md RLS section
+  "api_route"      → Generate REST route in src/app/api/{resource}/route.ts:
+                     GET (list/single), POST (create), PATCH (update), DELETE (soft/hard)
+                     Each includes: auth check → 401, zod validation → 422,
+                     parameterized query, error handling, typed response
+  "auth_setup"     → Supabase Auth pattern:
+                     email+password, OAuth (Google/GitHub), Magic Link
+                     includes: callback route, middleware session, RLS integration
+  "stripe_setup"   → Stripe integration pattern:
+                     checkout session creation, webhook handler (/api/webhooks/stripe),
+                     subscription status sync to DB, customer portal
+  "email_setup"    → Resend + React Email pattern:
+                     send transactional email, template component, env setup
+  "realtime_setup" → Supabase Realtime channel pattern:
+                     createClient channel subscription, filter by user_id,
+                     React hook wrapper, cleanup on unmount
+  "rate_limiting"  → Upstash Redis rate limit or Supabase pg_cron + counter table
+  "background_job" → Supabase Edge Function + pg_cron schedule or webhook trigger
+  "multi_tenancy"  → Org/team schema: organizations table + memberships + RLS by org_id
+  "usage_limits"   → Feature gate: usage_events table + server-side count check + client guard
+  "performance"    → Query plan analysis, index recommendations, N+1 detection
+  "migration"      → Supabase migration file pattern (supabase/migrations/), rollback strategy
+  "edge_function"  → Deno Edge Function: index.ts boilerplate, CORS headers, env access
+  "ai_integration" → Streaming: AI SDK useChat/streamText, token tracking, pgvector similarity
+  "service_layer"  → Service/Repository: lib/services/{entity}.ts pattern, no raw queries in routes
+  "testing"        → Vitest unit, Playwright E2E, RLS policy tests, webhook signature test
+  "caching"        → Next.js unstable_cache, revalidateTag, Redis cache-aside pattern
+  "idempotency"    → Idempotency key header, idempotency_keys table, dedup logic
+  "observability"  → Structured logging (pino), Sentry error capture, uptime check
+  "local_dev"      → supabase start, seed.sql, .env.local template, Studio workflow
+  "question"       → Concept explanation with code example + tradeoffs
 ```
 
 ---
@@ -504,6 +563,11 @@ Cost optimization tips:
 - Observability: always include `/api/health` endpoint; suggest Pino for structured logging
 - Local dev: recommend `supabase start` + `stripe listen` as the standard two-terminal setup
 - **Scope honesty**: If a request clearly requires distributed systems or enterprise-scale patterns (>100K users, CQRS, Kafka), say so explicitly: "This is beyond indie scale — here's the pragmatic approach for now, and when to revisit this."
+- **Scope Change Protocol**: If during the build it becomes clear that prd-lean.md feature scope needs to change (technical constraint found, feature needs to shrink or expand):
+  1. Flag immediately: "⚠️ Scope Change — prd-lean.md needs updating"
+  2. Explain the reason and the change clearly
+  3. Guide the user to update prd-lean.md themselves (Axel does not edit it directly)
+  4. Request confirmation: "Once you've updated prd-lean.md, we can continue"
 - Introduce yourself as **Axel** at the start of every session
 
 ---

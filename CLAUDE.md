@@ -74,6 +74,28 @@ Each skill references these for best practices and code patterns:
 
 ---
 
+## Skill Scope
+
+When working inside this project, use **only the skills listed below**.
+Do not invoke other globally registered skills (e.g. rich-guide, career-compass, market-pulse, portfolio-analyzer, etc.) unless explicitly requested by the user.
+
+| Allowed Skill | Trigger |
+|---------------|---------|
+| `indie-market-researcher` | `/indie-market-researcher` |
+| `indie-planner` | `/indie-planner` |
+| `indie-ux` | `/indie-ux` |
+| `indie-designer` | `/indie-designer` |
+| `indie-frontend` | `/indie-frontend` |
+| `indie-backend` | `/indie-backend` |
+| `indie-infra` | `/indie-infra` |
+| `indie-launcher` | `/indie-launcher` |
+| `launch-kit` | `/launch-kit` |
+| `indie-analyst` | `/indie-analyst` |
+| `indie-growth` | `/indie-growth` |
+| `indie-retro` | `/indie-retro` |
+
+---
+
 ## Reference
 
 - `indie-sprint-playbook.md` — Master sprint guide

@@ -379,6 +379,33 @@ export async function GET() {
     version: process.env.NEXT_PUBLIC_APP_VERSION ?? 'unknown',
   })
 }
+
+## Monitoring Readiness Gate
+
+**All 3 must pass before proceeding to `/indie-launcher`:**
+
+- [ ] **Sentry**: Run `throw new Error("sentry test")` in browser console → confirm error appears in Sentry dashboard
+- [ ] **UptimeRobot**: Register monitor → confirm first "UP" status received within 5 minutes
+- [ ] **Vercel Analytics**: Visit local or preview URL once → confirm 1 pageview recorded in Analytics dashboard
+
+```pseudocode
+monitoring_gate = {
+  sentry:    ask("Did Sentry capture the test error? (y/n)"),
+  uptime:    ask("Did UptimeRobot receive the first UP signal? (y/n)"),
+  analytics: ask("Did Vercel Analytics record a pageview? (y/n)"),
+}
+
+if ANY monitoring_gate.value == "n":
+  warn("""
+⚠️ Monitoring gate failed — launch blocked
+
+Launching without monitoring means production errors go undetected.
+Resolve the failing items first. Do not skip this step.
+  """)
+  // Do NOT suggest proceeding. Stay in infra mode until resolved.
+else:
+  print("✅ Monitoring gate passed — ready to proceed to `/indie-launcher`.")
+```
 ```
 
 ---
@@ -548,6 +575,11 @@ Consult a legal professional when revenue grows.
 - Stripe: always validate in test mode first, then switch to production
 - Cost awareness: flag anything that could generate unexpected bills (Supabase row limits, Vercel bandwidth, Sentry quotas)
 - Reference `knowledge/infra-guide.md` for Non-Negotiable Rules and 12-Factor checklist in any response
+- **Scope Change Protocol**: If a technical constraint discovered during deploy/infra setup conflicts with prd-lean.md (e.g., Vercel limits, Supabase tier limits):
+  1. Flag immediately: "⚠️ Scope Change — prd-lean.md or idea-canvas.md needs updating"
+  2. Explain the constraint and its impact clearly
+  3. Guide the user to update the document themselves (Sam does not edit it directly)
+  4. Request confirmation after update before continuing
 
 ---
 

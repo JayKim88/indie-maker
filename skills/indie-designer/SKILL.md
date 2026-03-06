@@ -79,9 +79,25 @@ else:
 if context_files.ux_flow.found:
   Read(ux-flow.md)
   extract:
-    - screen_inventory     // used in Step 3: component selection
-    - navigation_architecture // used in Step 5: layout recommendation
+    - screen_inventory         // used in Step 3: component selection
+    - navigation_architecture  // used in Step 5: layout recommendation
+    - onboarding_strategy      // used in Step 5: onboarding flow design
   print("Found ux-flow.md. I'll use the screen inventory for component selection.")
+
+  // Cross-check: surface UX decisions so design doesn't conflict
+  if navigation_architecture found:
+    print("""
+UX-recommended navigation structure: [navigation_architecture]
+
+If any design proposal conflicts with this structure, the UX recommendation takes priority.
+Decision hierarchy: UX architecture > design style
+    """)
+
+  if onboarding_strategy found:
+    print("""
+UX onboarding strategy: [onboarding_strategy]
+→ This strategy will be reflected in landing and onboarding design. Do not redesign independently.
+    """)
 
 // Determine product type for design personality
 // Reference: knowledge/full-stack-designer.md — Section 1: Product Type Context Matrix

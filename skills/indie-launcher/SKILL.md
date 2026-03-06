@@ -231,6 +231,55 @@ Channels ranked by effort-to-impact ratio for your product type:
 | Hacker Newsletter (weekly) | Submit D10 | Curated, 50K+ subscribers — pitch: "[product] for [IH audience]" |
 | Relevant subreddits | D10 | Only if target users live there and rules allow |
 | Newsletter sponsors / mentions | D10 pitch | Niche newsletters in your space — often reply to a tip |
+| Niche media pitch | D8-D10 | SaaS/indie-focused blogs and newsletters — see below |
+
+---
+
+**Niche Media Pitch** (D8-D10):
+
+Mainstream tech press (TechCrunch, The Verge) requires significant traction before covering indie products.
+Niche media has lower barriers and often higher relevance to your target user.
+
+Target outlets by product type:
+```
+Indie SaaS / Developer tools:
+→ Indie Hackers (milestone post: "I launched X and made $Y in week 1")
+→ The Bootstrapped Founder newsletter (reply with a story angle)
+→ Software Engineering Daily (developer-focused products only)
+→ SaaS Weekly (submit via their tip form)
+
+AI tools:
+→ Ben's Bites (ben@bensbites.co — reply with "here's a tool for your readers")
+→ The Rundown AI (brief pitch — 2 sentences + link)
+→ AlphaSignal (technical AI products)
+
+Productivity / No-code:
+→ No Code Founders newsletter
+→ Product Hunt Digest (already covered by PH launch)
+→ Notion / Zapier ecosystem blogs (if integration exists)
+```
+
+Pitch format (write this on D8, send D9-D10):
+```
+Subject: [Product name] — [one-line value prop]
+
+Hi [name],
+
+I built [product name] for [specific user] who [specific problem].
+
+[1 concrete data point: beta user quote / early traction / interesting
+technical detail relevant to their audience]
+
+[Link] — happy to share a free access for you to try.
+
+[Your name]
+```
+
+Rules:
+- 3-5 sentences max. Never attach a press release.
+- Personalize: reference a recent piece they wrote.
+- Follow up once, 4 days later. No more.
+- Do NOT pitch the same story to 10 identical newsletters — each needs a slightly different angle.
 
 ---
 
@@ -692,6 +741,29 @@ DO NOT repeat the PH post — write a new story for the HN audience.
 
 ---
 
+**D15 — Channel attribution data collection (indie-analyst handoff)**
+
+Capture data from Vercel Analytics → Referrer tab and save as `launch-metrics.md`:
+
+```markdown
+## Channel conversion data (captured D15)
+| Channel | Visitors | Signups | Conversion |
+|---------|----------|---------|------------|
+| Product Hunt | | | |
+| BetaList | | | |
+| Show HN | | | |
+| Twitter/X | | | |
+| Direct | | | |
+| Other | | | |
+
+Total signups: ___
+Paid conversions: ___
+```
+
+→ `/indie-analyst` will auto-reference this file on next run.
+
+---
+
 **D15-D17 — Social Proof Loop**
 
 1. Screenshot the best PH reviews
@@ -737,7 +809,10 @@ Define "failure" and have a plan before D14 so you don't spiral.
 ## Launch Failure Plan B
 
 "Failure" definition for this launch:
-→ < 50 upvotes AND < [kill criteria signups from idea-canvas.md]
+→ < 50 upvotes **OR** signups < [kill criteria signups from idea-canvas.md]
+
+⚠️ OR condition: PH upvotes are a channel signal; signups are a product signal.
+Either one falling short warrants diagnosis.
 
 ---
 
@@ -868,7 +943,7 @@ Default: current directory.
 
 ## Plan B
 
-**Failure definition**: < [N] upvotes AND < [signups from kill criteria]
+**Failure definition**: < [N] upvotes **OR** signups < [signups from kill criteria]
 **Diagnosis questions**: [from Step 9]
 **Chosen option**: [A / B / C / D — decide in advance]
 
@@ -964,6 +1039,7 @@ If you need:
 - [ ] Post-launch momentum plan (D14+ review collection, show HN, reflection post)
 - [ ] BetaList submission reminder included
 - [ ] Show HN plan (if product is technical)
+- [ ] Niche media pitch drafted (D8-D10) — at least 1 relevant outlet identified and pitch written
 
 ### Self-Assessment Block (prepend to every saved artifact)
 ---
