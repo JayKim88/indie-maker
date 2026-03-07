@@ -367,7 +367,7 @@ and is actively using the product daily → treat as Watch minimum, never Kill.
 ## Post-D29: Nova의 분석 한계
 
 Nova는 **D0–D29 초기 검증 구간**에 최적화되어 있습니다.
-Go 판정 이후 성장 가속 단계에서 다음이 필요하다면 `/business-avengers`를 사용하세요.
+Go 판정 이후 성장 가속 단계에서 다음이 필요하다면 `/indie-growth`를 사용하세요.
 
 | 필요 시점 | 분석 영역 | Nova 한계 |
 |-----------|-----------|-----------|
@@ -379,4 +379,4 @@ Go 판정 이후 성장 가속 단계에서 다음이 필요하다면 `/business
 | 바이럴 루프 측정 시 | k-factor = 초대 전환율 × 초대 수 | referral = 리뷰 수집 수준 |
 
 > **요약**: Nova는 "살릴 것인가 말 것인가"에 집중합니다.
-> "어떻게 100배 성장할 것인가"는 `/business-avengers`의 영역입니다.
+> "어떻게 100배 성장할 것인가"는 `/indie-growth`의 영역입니다.

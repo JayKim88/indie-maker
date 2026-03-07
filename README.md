@@ -25,7 +25,7 @@ flowchart TD
     end
     subgraph row2[" "]
         direction RL
-        H["Phase 6<br/>Launch Day<br/>D14"] --> G["Phase 5<br/>Launch Prep<br/>D7–D13"] --> F["Phase 3–5<br/>Build + Deploy<br/>D3–D6"]
+        F["Phase 3–5<br/>Build + Deploy<br/>D3–D6"] --> G["Phase 5<br/>Launch Prep<br/>D7–D13"] --> H["Phase 6<br/>Launch Day<br/>D14"]
     end
     subgraph row3[" "]
         direction LR
@@ -34,8 +34,8 @@ flowchart TD
         J -->|Kill| L["Phase 9<br/>Retro<br/>D29"]
     end
 
-    E --> H
-    F --> I
+    E --> F
+    H --> I
 
     style A fill:#f5f5f5,stroke:#999
     style J fill:#ffe0b2,stroke:#e65100
@@ -80,7 +80,7 @@ flowchart TD
     LC["landing-copy.md"]
     PS["pricing-strategy.md"]
     MVP["Working MVP<br/>(live URL)"]
-    LP["launch-plan.md<br/>bip-posts.md"]
+    LP["launch-plan.md<br/>bip-posts.md<br/>launch-metrics.md"]
     LIVE["Live Product"]
     KG["kill-go-report.md"]
 
@@ -119,7 +119,7 @@ flowchart TD
 | 2   | `/indie-planner`           | Reid  | 0+1    | D1 morning                | `docs/indie-planner/`                 |
 | 3   | `/indie-ux`                | Kai   | 1.5    | D1 afternoon              | `docs/indie-ux/`                      |
 | 4   | `/indie-designer`          | Vera  | 2      | D2                        | `docs/indie-designer/`                |
-| 5   | `/indie-monetize`          | Finn  | 2–3    | D2–D3, before Stripe code | `docs/indie-monetize/`                |
+| 5   | `/indie-monetize`          | Finn  | 2–3 + 7 | D2–D3 (before Stripe code), D21+ (post-launch tune) | `docs/indie-monetize/` |
 | 6   | `/indie-frontend`          | Rex   | 3–5    | D3–D6 continuous          | — (interactive guide)                 |
 | 7   | `/indie-backend`           | Axel  | 3–5    | D3–D6 continuous          | — (interactive guide)                 |
 | 8   | `/indie-infra`             | Sam   | 3–5+6  | D6 QA + deploy            | — (guide + QA checklist)              |
@@ -166,22 +166,25 @@ gantt
     axisFormat W%W
 
     section Product A
-    Build D1-D6        :a1, 2024-01-01, 6d
-    Launch Prep D7-D13 :a2, after a1, 7d
-    Post-Launch D14-D28 :a3, after a2, 15d
-    Kill/Go D29        :milestone, after a3, 0d
+    Build D1-D6         :a1, 2024-01-01, 6d
+    Launch Prep D7-D13  :a2, after a1, 7d
+    Launch Day D14      :a3, after a2, 1d
+    Post-Launch D15-D28 :a4, after a3, 14d
+    Kill/Go D29         :milestone, after a4, 0d
 
     section Product B
-    Build D1-D6        :b1, 2024-01-08, 6d
-    Launch Prep D7-D13 :b2, after b1, 7d
-    Post-Launch D14-D28 :b3, after b2, 15d
-    Kill/Go D29        :milestone, after b3, 0d
+    Build D1-D6         :b1, 2024-01-08, 6d
+    Launch Prep D7-D13  :b2, after b1, 7d
+    Launch Day D14      :b3, after b2, 1d
+    Post-Launch D15-D28 :b4, after b3, 14d
+    Kill/Go D29         :milestone, after b4, 0d
 
     section Product C
-    Build D1-D6        :c1, 2024-01-15, 6d
-    Launch Prep D7-D13 :c2, after c1, 7d
-    Post-Launch D14-D28 :c3, after c2, 15d
-    Kill/Go D29        :milestone, after c3, 0d
+    Build D1-D6         :c1, 2024-01-15, 6d
+    Launch Prep D7-D13  :c2, after c1, 7d
+    Launch Day D14      :c3, after c2, 1d
+    Post-Launch D15-D28 :c4, after c3, 14d
+    Kill/Go D29         :milestone, after c4, 0d
 ```
 
 > Staggered 1 week → bi-weekly launch rhythm → up to 12 experiments/year
@@ -205,10 +208,11 @@ gantt
 
 1. **Kill criteria first** — set the D29 numbers before writing a line of code
 2. **Pre-sale before build** — 3+ people pay → build; 0 pay → don't build
-3. **One core flow only** — anything else goes to `backlog.md`
-4. **Ship when it works** — perfection is the enemy of launch
-5. **Automate after $100 MRR** — manual before that, or you're optimizing too early
-6. **Kill = data, not failure** — run `/indie-retro` to extract learning for the next sprint
+3. **Validate demand before building** — use `/indie-market-researcher --validate` if skipping full research
+4. **One core flow only** — anything else goes to `backlog.md`
+5. **Ship when it works** — perfection is the enemy of launch
+6. **Automate after $100 MRR** — manual before that, or you're optimizing too early
+7. **Kill = data, not failure** — run `/indie-retro` to extract learning for the next sprint
 
 ---
 

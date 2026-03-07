@@ -9,10 +9,10 @@ from market research to Kill/Go decision and beyond — powered by 12 specialize
 
 ```
 Path A (리서치 → 기획):
-[Phase -1]   [Phase 0+1]  [Phase 1.5]  [Phase 2]   [Phase 3-5]        [Phase 5]       [Phase 6]  [Phase 7]    [Gate]     [Phase 8+]  [Phase 9]
- Market     →  Idea +    → UX Sprint → Design   → Build +           → Launch        → Launch  → Post      → Kill/Go → Growth  → Retro
- Research     Planning               Sprint     Deploy Sprint         Prep Sprint      Day       Launch
- D-1 (opt)    D1 (1 day)  D1 afternoon D2 (1 day)  D3-D6 (4 days)     D7-D13 (7 days)  D14       D15-D28      D29        D30+        D29(Kill)
+[Phase -1]   [Phase 0+1]  [Phase 1.5]  [Phase 2]   [Phase 2.5]  [Phase 3-5]     [Phase 5]       [Phase 6]  [Phase 7]    [Gate]     [Phase 8+]  [Phase 9]
+ Market     →  Idea +    → UX Sprint → Design   → Monetize   → Build +       → Launch        → Launch  → Post      → Kill/Go → Growth  → Retro
+ Research     Planning               Sprint     Pricing      Deploy Sprint     Prep Sprint      Day       Launch
+ D-1 (opt)    D1 (1 day)  D1 afternoon D2 (1 day)  D2-D3        D3-D6 (4 days)  D7-D13 (7 days)  D14       D15-D28      D29        D30+        D29(Kill)
 
 Path B (기획 → 수요검증 → 기획):
                 [Phase 0+1]  →  validate mode  →  [Phase 0+1 continues]  → ...
@@ -28,10 +28,13 @@ Path B (기획 → 수요검증 → 기획):
 docs/indie-market-researcher/*.md ─────────────────────────────────────────────────────────┐
                                                                                              ↓
 docs/indie-planner/idea-canvas.md → docs/indie-planner/prd-lean.md
-  → docs/indie-ux/ux-flow.md → docs/indie-designer/design-brief.md
+  → docs/indie-ux/ux-flow.md + wireframes.md
+  → docs/indie-designer/design-brief.md + landing-copy.md
+  → docs/indie-monetize/pricing-strategy.md
   → MVP
-  → docs/indie-analyst/kill-go-report.md → docs/indie-growth/growth-experiments.md
-                                         → docs/indie-retro/retrospective.md
+  → docs/indie-launcher/launch-plan.md + bip-posts.md + launch-metrics.md
+  → docs/indie-analyst/kill-go-report.md → docs/indie-growth/growth-experiments.md + channel-strategy.md
+                                         → docs/indie-retro/retrospective.md + lessons.md
 docs/indie-market-researcher/demand-validation.md ┘ (기획 중 validate 실행 시)
 docs/indie-retro/lessons.md → (다음 사이클 market-researcher 자동 읽기)
 ```
@@ -66,6 +69,7 @@ docs/indie-retro/lessons.md → (다음 사이클 market-researcher 자동 읽�
 | `indie-backend` | Axel | `/indie-backend` | 3-5 | — (guide) |
 | `indie-infra` | Sam | `/indie-infra` | 3-5+6 | — (guide + QA checklist) |
 | `indie-monetize` | Finn | `/indie-monetize` | 2-3 + 7 | `docs/indie-monetize/` |
+| `launch-kit` | — | `/launch-kit` | 5 | `launch-kit-output.md` |
 | `indie-launcher` | Leo | `/indie-launcher` | 5 | `docs/indie-launcher/` |
 | `indie-analyst` | Nova | `/indie-analyst` | 7+Gate | `docs/indie-analyst/` |
 | `indie-growth` | Gio | `/indie-growth` | 8+ (Go) | `docs/indie-growth/` |
@@ -82,16 +86,19 @@ Each skill references these for best practices and code patterns:
 - `knowledge/backend-guide.md` — Supabase, REST principles, OWASP Top 10, RLS
 - `knowledge/infra-guide.md` — Vercel, 12-Factor App, security hardening, observability
 - `knowledge/automate-guide.md` — Email drip sequences, Stripe webhooks, metrics automation (Resend + pg_cron)
+- `knowledge/tech-stack.md` — Canonical stack constraints — do not deviate without reason
 
 ---
 
 ## Sprint Principles
 
 1. **Kill criteria first** — Decide the D29 numbers before writing a line of code
-2. **Validate demand before building** — Use `indie-market-researcher --validate` if skipping full research
-3. **One core flow only** — Anything outside it goes to `backlog.md`; never implement immediately
-4. **Ship when it works** — Perfection is the enemy of launch
-5. **Kill = data, not failure** — Run indie-retro to extract learning for the next sprint
+2. **Pre-sale before build** — 3+ people pay → build; 0 pay → don't build
+3. **Validate demand before building** — Use `indie-market-researcher --validate` if skipping full research
+4. **One core flow only** — Anything outside it goes to `backlog.md`; never implement immediately
+5. **Ship when it works** — Perfection is the enemy of launch
+6. **Automate after $100 MRR** — manual before that, or you're optimizing too early
+7. **Kill = data, not failure** — Run indie-retro to extract learning for the next sprint
 
 ---
 
