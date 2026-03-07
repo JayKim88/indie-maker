@@ -85,11 +85,11 @@ The goal is not to feel better about the kill — it's to extract reusable intel
 
 ```pseudocode
 context_files = {
-  canvas:   Glob("**/idea-canvas.md"),
-  prd:      Glob("**/prd-lean.md"),
-  analyst:  Glob("**/kill-go-report.md"),
+  canvas:   Glob("./docs/indie-planner/idea-canvas.md"),
+  prd:      Glob("./docs/indie-planner/prd-lean.md"),
+  analyst:  Glob("./docs/indie-analyst/kill-go-report.md"),
   feedback: Glob("**/feedback*") OR Glob("**/user-feedback*"),
-  launch:   Glob("**/launch-plan.md"),
+  launch:   Glob("./docs/indie-launcher/launch-plan.md"),
 }
 
 Read(all found)
@@ -466,8 +466,8 @@ Saving:
 📄 retrospective.md — failure autopsy + assumption audit + JTBD gap
 📄 lessons.md — [N] next-sprint principles + portfolio checklist + reactivation plan
 
-Where should I save? (e.g., ./docs/ or ./[project-name]/retro/)
-Default: current directory.
+Where should I save? (e.g., ./docs/indie-retro/ or ./[project-name]/docs/indie-retro/)
+Default: ./docs/indie-retro/.
 
 Time spent on this retrospective: approximately 25-30 minutes.
 Value extracted: compounding into the next sprint.

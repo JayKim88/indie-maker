@@ -72,9 +72,9 @@ Sits between indie-planner (what to build) and indie-designer (how it looks).
 
 ```pseudocode
 context_files = {
-  prd:    Glob("**/prd-lean.md"),
-  canvas: Glob("**/idea-canvas.md"),
-  ux:     Glob("**/ux-flow.md"),  // check if already exists
+  prd:    Glob("./docs/indie-planner/prd-lean.md"),
+  canvas: Glob("./docs/indie-planner/idea-canvas.md"),
+  ux:     Glob("./docs/indie-ux/ux-flow.md"),  // check if already exists
 }
 
 if context_files.prd.found:
@@ -582,8 +582,8 @@ Saving:
 📄 ux-flow.md — mental model + task flows + screen inventory + onboarding plan + assumptions
 📄 wireframes.md — lo-fi wireframes + cognitive load annotations + interaction states
 
-Where should I save these? (e.g., ./docs/ or ./[project-name]/)
-Default: current directory.
+Where should I save these? (e.g., ./docs/indie-ux/ or ./[project-name]/docs/indie-ux/)
+Default: ./docs/indie-ux/.
 ```
 
 ---
@@ -867,3 +867,22 @@ Next:
 - UX Assumptions documented: [N assumptions]
 - Unresolved decisions: [list or "none"]
 ---
+
+## indie-maker Web App Integration (MCP)
+
+After saving deliverables:
+
+1. Read `.indie-maker` file in the **current directory** to get the project name.
+   - If the file doesn't exist, skip MCP calls and inform the user:
+     > "웹 앱 동기화를 사용하려면 프로젝트 루트에 `.indie-maker` 파일을 만들고 웹 앱 프로젝트 이름을 한 줄로 입력하세요."
+
+2. Call MCP tools using the project name as `project_id`:
+
+```
+im_complete_task(project_id=<name>, task_key="ux-sprint")
+im_upload_document(project_id=<name>, type="ux-flow", content=<ux-flow.md 전체 내용>)
+im_upload_document(project_id=<name>, type="wireframes", content=<wireframes.md 전체 내용>)
+```
+
+Only call MCP tools if the `indie-maker` MCP server is connected (tools `im_*` are available).
+Skip silently if not connected — do not error or warn the user.

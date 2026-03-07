@@ -83,10 +83,10 @@ Picks up where indie-analyst leaves off — takes the AARRR data and builds the 
 
 ```pseudocode
 context_files = {
-  canvas:   Glob("**/idea-canvas.md"),
-  prd:      Glob("**/prd-lean.md"),
-  analyst:  Glob("**/kill-go-report.md") OR Glob("**/growth-report.md"),
-  growth:   Glob("**/growth-experiments.md"),  // existing if re-running
+  canvas:   Glob("./docs/indie-planner/idea-canvas.md"),
+  prd:      Glob("./docs/indie-planner/prd-lean.md"),
+  analyst:  Glob("./docs/indie-analyst/kill-go-report.md") OR Glob("**/growth-report.md"),
+  growth:   Glob("./docs/indie-growth/growth-experiments.md"),  // existing if re-running
 }
 
 Read(all found)
@@ -795,8 +795,8 @@ Saving:
 📄 growth-experiments.md — ICE-scored experiment backlog + tracking log
 📄 channel-strategy.md — Bull's Eye channel selection + 6-month roadmap + RICE V2 backlog
 
-Where should I save? (e.g., ./docs/ or ./[project-name]/)
-Default: current directory.
+Where should I save? (e.g., ./docs/indie-growth/ or ./[project-name]/docs/indie-growth/)
+Default: ./docs/indie-growth/.
 ```
 
 ---

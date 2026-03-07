@@ -1,7 +1,46 @@
 # indie-maker Pipeline Review - Wrap Up
 
 > **Project**: `/Users/jaykim/Documents/Projects/indie-maker`
-> **Scope**: `skills/` (11 skill files), `test-sprint/`
+> **Scope**: `skills/`, `CLAUDE.md`, `knowledge/`, `.gitignore`
+
+## Session: 2026-03-07 22:49
+
+> **Context**: Standardized project output structure to `docs/{skill}/` paths, added indie-monetize skill (12th), expanded indie-launcher Community Channel Deep Dive, unified Glob paths across all SKILL.md files.
+
+### Done
+
+- feat(CLAUDE.md): updated skill count 11 → 12 (indie-monetize)
+- refactor(CLAUDE.md): rewrote document flow section with `docs/{skill}/` path system
+- docs(CLAUDE.md): added Project directory structure block with full docs/ subdirectory map
+- feat(CLAUDE.md): added indie-monetize (Finn) to Skill Reference table and Scope allowlist
+- docs(CLAUDE.md): added `knowledge/automate-guide.md` to Knowledge Documents section
+- feat(skills/indie-monetize): new skill added — Finn, Phase 2-3+7, outputs `pricing-strategy.md`
+- feat(skills/indie-launcher): added Step 3b Community Channel Deep Dive — standalone Reddit, HN, Discord/Slack playbooks
+- fix(skills/indie-launcher): removed hardcoded BetaList subscriber count (~800) → replaced with [ESTIMATE] label
+- refactor(skills/indie-market-researcher): migrated paths from `./research/` to `./docs/indie-market-researcher/`
+- refactor(skills/indie-market-researcher): narrowed Glob patterns from `**/idea-canvas.md` to `./docs/indie-planner/idea-canvas.md`
+- refactor(skills/indie-launcher): updated context_files Glob from `**/` to `./docs/{skill}/` explicit paths
+- refactor(skills/indie-planner, ux, designer, analyst, growth, retro): aligned output paths to docs/ structure
+- feat(knowledge/automate-guide.md): new knowledge doc — email drip, Stripe webhooks, metrics automation (Resend + pg_cron)
+- chore(.gitignore): added `project-ideas`, `projects/*`, `.claude/`
+- chore: deleted `indie-sprint-playbook.md` — content consolidated into CLAUDE.md
+
+### Decisions
+
+- **docs/ directory standard**: all skill outputs go to `{project}/docs/{skill-name}/` — eliminates `**/` Glob ambiguity
+- **indie-monetize added**: 12th skill in the sprint, Phase 2-3 + 7, pricing-strategy.md output
+- **indie-sprint-playbook.md removed**: CLAUDE.md Sprint Map + Skill Reference fully covers the content; duplicate removed
+- **Community Channel Deep Dive as Step 3b**: Reddit/HN/Discord playbooks separated into a standalone section in indie-launcher — distribution coverage beyond PH
+
+### Next
+
+- [ ] Review indie-monetize SKILL.md completeness (Finn persona, pricing-strategy.md template)
+- [ ] Review indie-launcher Step 3b Discord/Slack playbook (Reddit/HN reviewed)
+- [ ] Commit all changes with conventional commit messages
+- [ ] Update test-sprint/README.md index after next test run
+- [ ] Run second pipeline test with standard web SaaS fixture (verify indie-backend P0-3 routing)
+
+---
 
 ## Session: 2026-03-06 23:50
 

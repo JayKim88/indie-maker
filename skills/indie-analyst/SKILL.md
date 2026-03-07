@@ -56,14 +56,14 @@ metadata:
 
 ```pseudocode
 context = load_context([
-  Glob("**/idea-canvas.md"),       // Kill criteria baseline
-  Glob("**/prd-lean.md"),
-  Glob("**/launch-metrics.md"),    // Channel attribution (indie-launcher D15 output)
+  Glob("./docs/indie-planner/idea-canvas.md"),       // Kill criteria baseline
+  Glob("./docs/indie-planner/prd-lean.md"),
+  Glob("./docs/indie-launcher/launch-metrics.md"),    // Channel attribution (indie-launcher D15 output)
   "knowledge/analytics-guide.md",
 ])
 
 // Check for existing Watch verdict (D43 re-evaluation)
-watch_report = Glob("**/kill-go-report.md")
+watch_report = Glob("./docs/indie-analyst/kill-go-report.md")
 if watch_report.found:
   Read(kill-go-report.md)
   prior_verdict = extract(verdict)
@@ -343,7 +343,7 @@ On to the next cycle — this data makes your next product better.
 
 ```pseudocode
 // Save Kill report for indie-retro to read
-save_file("kill-go-report.md", {
+save_file("docs/indie-analyst/kill-go-report.md", {
   verdict:       "KILL",
   product:       product_name,
   date:          D29,
@@ -391,7 +391,7 @@ Re-run `/indie-analyst` at D43 with these thresholds.
 
 ```pseudocode
 // Save Watch report
-save_file("kill-go-report.md", {
+save_file("docs/indie-analyst/kill-go-report.md", {
   verdict:        "WATCH",
   product:        product_name,
   date:           D29,
@@ -457,7 +457,7 @@ This Week (Immediate Actions)
 
 ```pseudocode
 // Save Go report for indie-growth to read
-save_file("kill-go-report.md", {
+save_file("docs/indie-analyst/kill-go-report.md", {
   verdict:       "GO",
   product:       product_name,
   date:          D29,
@@ -628,3 +628,21 @@ Reference: AARRR framework, cohort analysis, and statistical significance princi
 - Analytics tool confirmed: [tool name / not set up — flagged]
 - Unresolved issues: [list or "none"]
 ---
+
+## indie-maker Web App Integration (MCP)
+
+After saving deliverables:
+
+1. Read `.indie-maker` file in the **current directory** to get the project name.
+   - If the file doesn't exist, skip MCP calls and inform the user:
+     > "웹 앱 동기화를 사용하려면 프로젝트 루트에 `.indie-maker` 파일을 만들고 웹 앱 프로젝트 이름을 한 줄로 입력하세요."
+
+2. Call MCP tools using the project name as `project_id`:
+
+```
+im_complete_task(project_id=<name>, task_key="kill-go-analysis")
+im_upload_document(project_id=<name>, type="kill-go-report", content=<kill-go-report.md 전체 내용>)
+```
+
+Only call MCP tools if the `indie-maker` MCP server is connected (tools `im_*` are available).
+Skip silently if not connected — do not error or warn the user.

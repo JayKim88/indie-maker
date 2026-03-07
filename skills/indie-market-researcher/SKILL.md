@@ -70,7 +70,7 @@ Output files are automatically read by `indie-planner` to skip redundant questio
 
 | | market-research-by-desire | indie-market-researcher |
 |--|--------------------------|------------------------|
-| Output dir | `~/.market-research-by-desire/projects/{slug}/` | `./research/` (project-local) |
+| Output dir | `~/.market-research-by-desire/projects/{slug}/` | `./docs/indie-market-researcher/` (project-local) |
 | Next step | Generic | Points to `/indie-planner` |
 | indie-planner integration | None | Output auto-read by indie-planner |
 | Focus | General market research | MVP idea validation |
@@ -95,8 +95,8 @@ validate_mode = (
   user_input contains "--validate"
   OR user_input contains "수요 검증"
   OR user_input contains "이 아이디어"
-  OR Glob("**/prd-lean.md").found    // planning already started = validate mode
-  OR Glob("**/idea-canvas.md").found // planning already started = validate mode
+  OR Glob("./docs/indie-planner/prd-lean.md").found    // planning already started = validate mode
+  OR Glob("./docs/indie-planner/idea-canvas.md").found // planning already started = validate mode
 )
 
 if validate_mode:
@@ -122,7 +122,7 @@ Running demand validation... (~5-8 min)
 // ─────────────────────────────────────────────────────
 
 // Check for previous sprint lessons (indie-retro output)
-prior_lessons = Glob("**/lessons.md")
+prior_lessons = Glob("./docs/indie-retro/lessons.md")
 if prior_lessons.found:
   Read(lessons.md)
   print("""
@@ -134,10 +134,10 @@ assumptions and distribution channel selection.
 
 // Check for existing research artifacts
 prior_research = {
-  market_analysis:    Glob("./research/market-analysis.md"),
-  competitive:        Glob("./research/competitive-analysis.md"),
-  revenue:            Glob("./research/revenue-model-draft.md"),
-  artifacts:          Glob("./research/artifacts/*.json"),
+  market_analysis:    Glob("./docs/indie-market-researcher/market-analysis.md"),
+  competitive:        Glob("./docs/indie-market-researcher/competitive-analysis.md"),
+  revenue:            Glob("./docs/indie-market-researcher/revenue-model-draft.md"),
+  artifacts:          Glob("./docs/indie-market-researcher/artifacts/*.json"),
 }
 
 has_prior = prior_research.market_analysis.found OR prior_research.competitive.found
@@ -146,7 +146,7 @@ if has_prior:
   print("""
 Hey, I'm Max — Market Intelligence Analyst.
 
-I found existing research in ./research/.
+I found existing research in ./docs/indie-market-researcher/.
 Before starting fresh, let me check what's already there.
   """)
   Read(existing files)
@@ -263,7 +263,7 @@ Validated by: {cheapest test — e.g., "post in r/[subreddit], count DMs"}
 Recommendation
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {🟢} Demand confirmed. Proceed to /indie-planner.
-     research/demand-validation.md saved — indie-planner will read it.
+     docs/indie-market-researcher/demand-validation.md saved — indie-planner will read it.
 {🟡} Weak signal. Run this test first: {specific test with success threshold}
      Come back when you have {N} signups / {N} Reddit upvotes / 1 paying customer.
 {🔴} No demand signal found. Consider:
@@ -274,7 +274,7 @@ Recommendation
 
 ```pseudocode
 // Save validation result
-save_file("research/demand-validation.md", demand_validation_report)
+save_file("docs/indie-market-researcher/demand-validation.md", demand_validation_report)
 // indie-planner will read this file in Step 0
 ```
 
@@ -285,13 +285,13 @@ save_file("research/demand-validation.md", demand_validation_report)
 ```pseudocode
 run: date '+%Y%m%d-%H%M%S' → slug
 
-output_dir = "./research"
+output_dir = "./docs/indie-market-researcher"
 mkdir -p {output_dir}/artifacts
 
 if mkdir fails:
   fallback to /tmp/indie-research/{slug}/artifacts
 
-print("Starting market research. Output will be saved to ./research/")
+print("Starting market research. Output will be saved to ./docs/indie-market-researcher/")
 ```
 
 ---
@@ -675,18 +675,18 @@ Follow the exact JSON structure in your agent definition file."""
 
 Read all artifact JSON files and templates. Write 3 markdown documents.
 
-**7.1: research/market-analysis.md**
+**7.1: docs/indie-market-researcher/market-analysis.md**
 - Template structure: `plugins/market-research-by-desire/templates/market-analysis.md`
 - Data: `artifacts/desire-map.json` + `artifacts/market-trends.json`
 - Fill: desire structure, TAM/SAM/SOM, trends, entry barriers
 - Missing data → mark as "No data — further research needed"
 
-**7.2: research/competitive-analysis.md**
+**7.2: docs/indie-market-researcher/competitive-analysis.md**
 - Template structure: `plugins/market-research-by-desire/templates/competitive-analysis.md`
 - Data: `artifacts/competitive-landscape.json` + `artifacts/gap-analysis.json`
 - Fill: competitor matrix, SWOT, positioning map, gap analysis
 
-**7.3: research/revenue-model-draft.md**
+**7.3: docs/indie-market-researcher/revenue-model-draft.md**
 - Template structure: `plugins/market-research-by-desire/templates/revenue-model-draft.md`
 - Data: `artifacts/revenue-models.json`
 - Fill: 3-5 models, comparison matrix, unit economics, recommended model
@@ -744,7 +744,7 @@ RAT (Riskiest Assumption)
   Kill if: {kill criteria with number + date}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Files saved to ./research/
+Files saved to ./docs/indie-market-researcher/
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   market-analysis.md
   competitive-analysis.md
@@ -814,14 +814,14 @@ Duration: ~12-18 min | Cost: ~$1-2
 When `indie-planner` starts, it checks for:
 
 ```
-./research/competitive-analysis.md  → skip Q3 (existing solutions)
-./research/gap-analysis.json        → pre-fill Q4 (differentiation)
-./research/revenue-model-draft.md   → pre-fill Step 3 (business model)
+./docs/indie-market-researcher/competitive-analysis.md          → skip Q3 (existing solutions)
+./docs/indie-market-researcher/artifacts/gap-analysis.json     → pre-fill Q4 (differentiation)
+./docs/indie-market-researcher/revenue-model-draft.md          → pre-fill Step 3 (business model)
 ```
 
 If all three exist, indie-planner opens with:
 ```
-Found existing market research in ./research/
+Found existing market research in ./docs/indie-market-researcher/
 I'll use this data to skip questions we already have answers for.
 Let's focus on validating your specific idea angle.
 ```
@@ -831,7 +831,7 @@ Let's focus on validating your specific idea angle.
 ## Interaction Principles
 
 - Introduce yourself as **Max** at the start of every session
-- Before starting fresh research: always check for existing `./research/` files — never overwrite silently
+- Before starting fresh research: always check for existing `./docs/indie-market-researcher/` files — never overwrite silently
 - **Name the top opportunity explicitly**: after gap analysis, state the single best opportunity with a feasibility score and the reason
 - **Challenge vague desire selections**: if the user picks a broad category, ask for a concrete pain they've personally observed — research grounded in lived experience produces better gaps
 - Surface the RAT (Riskiest Assumption): at the end of the pipeline, name the single assumption that, if wrong, invalidates the top opportunity
@@ -869,3 +869,21 @@ Before delivering any research artifact, verify against these rules.
 - RAT identified: [yes / no — state it]
 - Unresolved data gaps: [list or "none"]
 ---
+
+## indie-maker Web App Integration (MCP)
+
+After saving deliverables:
+
+1. Read `.indie-maker` file in the **current directory** to get the project name.
+   - If the file doesn't exist, skip MCP calls and inform the user:
+     > "웹 앱 동기화를 사용하려면 프로젝트 루트에 `.indie-maker` 파일을 만들고 웹 앱 프로젝트 이름을 한 줄로 입력하세요."
+
+2. Call MCP tools using the project name as `project_id`:
+
+```
+im_complete_task(project_id=<name>, task_key="market-research")
+im_upload_document(project_id=<name>, type="research", content=<research 요약 전체 내용>)
+```
+
+Only call MCP tools if the `indie-maker` MCP server is connected (tools `im_*` are available).
+Skip silently if not connected — do not error or warn the user.

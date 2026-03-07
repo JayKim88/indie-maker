@@ -63,10 +63,10 @@ Combines Design Lead + UI Designer + Conversion Designer roles.
 ```pseudocode
 // Auto-reference planning and UX files if available
 context_files = {
-  canvas:     Glob("**/idea-canvas.md"),
-  prd:        Glob("**/prd-lean.md"),
-  ux_flow:    Glob("**/ux-flow.md"),
-  wireframes: Glob("**/wireframes.md"),
+  canvas:     Glob("./docs/indie-planner/idea-canvas.md"),
+  prd:        Glob("./docs/indie-planner/prd-lean.md"),
+  ux_flow:    Glob("./docs/indie-ux/ux-flow.md"),
+  wireframes: Glob("./docs/indie-ux/wireframes.md"),
 }
 
 if context_files.prd.found OR context_files.canvas.found:
@@ -463,3 +463,22 @@ Reference: `knowledge/design-guide.md` — Non-Negotiable Rules section.
 - Color-not-alone for status: [pass / fail / N/A]
 - Unresolved issues: [list or "none"]
 ---
+
+## indie-maker Web App Integration (MCP)
+
+After saving deliverables:
+
+1. Read `.indie-maker` file in the **current directory** to get the project name.
+   - If the file doesn't exist, skip MCP calls and inform the user:
+     > "웹 앱 동기화를 사용하려면 프로젝트 루트에 `.indie-maker` 파일을 만들고 웹 앱 프로젝트 이름을 한 줄로 입력하세요."
+
+2. Call MCP tools using the project name as `project_id`:
+
+```
+im_complete_task(project_id=<name>, task_key="design-sprint")
+im_upload_document(project_id=<name>, type="design-brief", content=<design-brief.md 전체 내용>)
+im_upload_document(project_id=<name>, type="landing-copy", content=<landing-copy.md 전체 내용>)
+```
+
+Only call MCP tools if the `indie-maker` MCP server is connected (tools `im_*` are available).
+Skip silently if not connected — do not error or warn the user.

@@ -1,7 +1,7 @@
 # Indie Maker
 
 An AI collaboration system covering every phase of the indie maker sprint —
-from market research to Kill/Go decision and beyond — powered by 11 specialized interactive skills.
+from market research to Kill/Go decision and beyond — powered by 12 specialized interactive skills.
 
 ---
 
@@ -25,12 +25,31 @@ Path B (기획 → 수요검증 → 기획):
 
 **Document flow**:
 ```
-research/*.md ─────────────────────────────────────────────────┐
-                                                                ↓
-idea-canvas.md → prd-lean.md → ux-flow.md → design-brief.md → MVP → kill-go-report.md → growth-experiments.md
-                     ↑                                                                  → retrospective.md
-demand-validation.md ┘ (기획 중 validate 실행 시)
-                                                          lessons.md → (다음 사이클 market-researcher 자동 읽기)
+docs/indie-market-researcher/*.md ─────────────────────────────────────────────────────────┐
+                                                                                             ↓
+docs/indie-planner/idea-canvas.md → docs/indie-planner/prd-lean.md
+  → docs/indie-ux/ux-flow.md → docs/indie-designer/design-brief.md
+  → MVP
+  → docs/indie-analyst/kill-go-report.md → docs/indie-growth/growth-experiments.md
+                                         → docs/indie-retro/retrospective.md
+docs/indie-market-researcher/demand-validation.md ┘ (기획 중 validate 실행 시)
+docs/indie-retro/lessons.md → (다음 사이클 market-researcher 자동 읽기)
+```
+
+**Project directory structure** (output files saved here by default):
+```
+{project}/
+├── docs/
+│   ├── indie-market-researcher/   ← market-analysis.md, competitive-analysis.md, revenue-model-draft.md, demand-validation.md, artifacts/
+│   ├── indie-planner/             ← idea-canvas.md, prd-lean.md
+│   ├── indie-ux/                  ← ux-flow.md, wireframes.md
+│   ├── indie-designer/            ← design-brief.md, landing-copy.md
+│   ├── indie-monetize/            ← pricing-strategy.md
+│   ├── indie-launcher/            ← launch-plan.md, bip-posts.md, launch-metrics.md
+│   ├── indie-analyst/             ← kill-go-report.md
+│   ├── indie-growth/              ← growth-experiments.md, channel-strategy.md
+│   └── indie-retro/               ← retrospective.md, lessons.md
+└── src/                           ← product code
 ```
 
 ---
@@ -39,17 +58,18 @@ demand-validation.md ┘ (기획 중 validate 실행 시)
 
 | Skill | Agent | Trigger | Phase | Output |
 |-------|-------|---------|-------|--------|
-| `indie-market-researcher` | Max | `/indie-market-researcher` | -1 | research/*.md + idea candidates |
-| `indie-planner` | Reid | `/indie-planner` | 0+1 | idea-canvas.md + prd-lean.md |
-| `indie-ux` | Kai | `/indie-ux` | 1.5 | ux-flow.md + wireframes.md |
-| `indie-designer` | Vera | `/indie-designer` | 2 | design-brief.md + landing-copy.md |
+| `indie-market-researcher` | Max | `/indie-market-researcher` | -1 | `docs/indie-market-researcher/` |
+| `indie-planner` | Reid | `/indie-planner` | 0+1 | `docs/indie-planner/` |
+| `indie-ux` | Kai | `/indie-ux` | 1.5 | `docs/indie-ux/` |
+| `indie-designer` | Vera | `/indie-designer` | 2 | `docs/indie-designer/` |
 | `indie-frontend` | Rex | `/indie-frontend` | 3-5 | — (guide) |
 | `indie-backend` | Axel | `/indie-backend` | 3-5 | — (guide) |
 | `indie-infra` | Sam | `/indie-infra` | 3-5+6 | — (guide + QA checklist) |
-| `indie-launcher` | Leo | `/indie-launcher` | 5 | launch-plan.md + bip-posts.md |
-| `indie-analyst` | Nova | `/indie-analyst` | 7+Gate | kill-go-report.md |
-| `indie-growth` | Gio | `/indie-growth` | 8+ (Go) | growth-experiments.md + channel-strategy.md |
-| `indie-retro` | Sage | `/indie-retro` | 9 (Kill) | retrospective.md + lessons.md |
+| `indie-monetize` | Finn | `/indie-monetize` | 2-3 + 7 | `docs/indie-monetize/` |
+| `indie-launcher` | Leo | `/indie-launcher` | 5 | `docs/indie-launcher/` |
+| `indie-analyst` | Nova | `/indie-analyst` | 7+Gate | `docs/indie-analyst/` |
+| `indie-growth` | Gio | `/indie-growth` | 8+ (Go) | `docs/indie-growth/` |
+| `indie-retro` | Sage | `/indie-retro` | 9 (Kill) | `docs/indie-retro/` |
 
 ---
 
@@ -61,6 +81,7 @@ Each skill references these for best practices and code patterns:
 - `knowledge/frontend-guide.md` — Next.js App Router, RSC rules, TypeScript strict, accessibility
 - `knowledge/backend-guide.md` — Supabase, REST principles, OWASP Top 10, RLS
 - `knowledge/infra-guide.md` — Vercel, 12-Factor App, security hardening, observability
+- `knowledge/automate-guide.md` — Email drip sequences, Stripe webhooks, metrics automation (Resend + pg_cron)
 
 ---
 
@@ -88,6 +109,7 @@ Do not invoke other globally registered skills (e.g. rich-guide, career-compass,
 | `indie-frontend` | `/indie-frontend` |
 | `indie-backend` | `/indie-backend` |
 | `indie-infra` | `/indie-infra` |
+| `indie-monetize` | `/indie-monetize` |
 | `indie-launcher` | `/indie-launcher` |
 | `launch-kit` | `/launch-kit` |
 | `indie-analyst` | `/indie-analyst` |

@@ -1,1 +1,4 @@
 local-only
+project-ideas
+projects/*
+.claude/

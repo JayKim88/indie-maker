@@ -63,17 +63,17 @@ Combines Customer Development (Steve Blank) + Lean Startup (Eric Ries) + JTBD (C
 ```pseudocode
 // Check if indie-market-researcher has already run
 research = {
-  competitive:        Glob("./research/competitive-analysis.md"),
-  gap:                Glob("./research/artifacts/gap-analysis.json"),
-  revenue:            Glob("./research/revenue-model-draft.md"),
-  demand_validation:  Glob("./research/demand-validation.md"),  // validate mode output
+  competitive:        Glob("./docs/indie-market-researcher/competitive-analysis.md"),
+  gap:                Glob("./docs/indie-market-researcher/artifacts/gap-analysis.json"),
+  revenue:            Glob("./docs/indie-market-researcher/revenue-model-draft.md"),
+  demand_validation:  Glob("./docs/indie-market-researcher/demand-validation.md"),  // validate mode output
 }
 
 has_research    = research.competitive.found OR research.revenue.found
 has_validation  = research.demand_validation.found
 
 // Load lessons from previous sprint (indie-retro output)
-lessons_file = Glob("**/lessons.md")
+lessons_file = Glob("./docs/indie-retro/lessons.md")
 if lessons_file.found:
   Read(lessons_file)
   master_pattern = extract(lessons_file.master_pattern) OR ""
@@ -145,7 +145,7 @@ Phase 0+1 기획 세션을 시작합니다.
 ```
 안녕하세요! 인디 플래너입니다. 🎯
 
-./research/ 에서 시장조사 결과를 발견했습니다.
+./docs/indie-market-researcher/ 에서 시장조사 결과를 발견했습니다.
 경쟁사 분석과 수익 모델 데이터를 활용해 중복 질문을 건너뛰겠습니다.
 
 어떤 아이디어를 검증하고 싶으신가요?
@@ -165,7 +165,7 @@ First, tell me about your idea — what product are you building?
 ```
 Hey! I'm your Indie Planner. 🎯
 
-Found existing market research in ./research/
+Found existing market research in ./docs/indie-market-researcher/
 I'll use this data to skip questions we already have answers for.
 
 Tell me your idea — what specific angle do you want to validate?
@@ -234,7 +234,7 @@ Est. ARPU range: {wtp.arpu_range}
 if research.competitive.found:
   // SKIP this question
   print("""
-Found competitor data in ./research/competitive-analysis.md.
+Found competitor data in ./docs/indie-market-researcher/competitive-analysis.md.
 Skipping this question — I'll use the research data directly.
 
 Key competitors identified:
@@ -256,7 +256,7 @@ Tell me if there are similar tools or services.
 if research.gap.found:
   // PRE-FILL from gap-analysis.json
   print("""
-Based on the gap analysis in ./research/:
+Based on the gap analysis in ./docs/indie-market-researcher/:
 
 Top unmet needs found:
 [top 2 gaps from gap-analysis.json]
@@ -323,7 +323,7 @@ if research.revenue.found:
   // PRE-FILL from revenue-model-draft.md
   recommended_model = extract_top_recommendation(revenue-model-draft.md)
   print("""
-Based on ./research/revenue-model-draft.md:
+Based on ./docs/indie-market-researcher/revenue-model-draft.md:
 
 Recommended model: {recommended_model.name}
 Rationale: {recommended_model.rationale}
@@ -425,8 +425,8 @@ I'll save these files:
 📄 idea-canvas.md
 📄 prd-lean.md
 
-Tell me where to save them (e.g., ./docs/ or ./[project-name]/)
-If unspecified, I'll save to the current directory.
+Tell me where to save them (e.g., ./docs/indie-planner/ or ./[project-name]/docs/indie-planner/)
+If unspecified, I'll save to ./docs/indie-planner/.
 ```
 
 #### idea-canvas.md template
@@ -602,3 +602,22 @@ Reference: `knowledge/founding-pm-guide.md` — Non-Negotiable Rules section.
 - Business model decided: [yes / no]
 - Unresolved issues: [list or "none"]
 ---
+
+## indie-maker Web App Integration (MCP)
+
+After saving deliverables:
+
+1. Read `.indie-maker` file in the **current directory** to get the project name.
+   - If the file doesn't exist, skip MCP calls and inform the user:
+     > "웹 앱 동기화를 사용하려면 프로젝트 루트에 `.indie-maker` 파일을 만들고 웹 앱 프로젝트 이름을 한 줄로 입력하세요."
+
+2. Call MCP tools using the project name as `project_id`:
+
+```
+im_complete_task(project_id=<name>, task_key="ideation")
+im_upload_document(project_id=<name>, type="idea-canvas", content=<idea-canvas.md 전체 내용>)
+im_upload_document(project_id=<name>, type="prd-lean", content=<prd-lean.md 전체 내용>)
+```
+
+Only call MCP tools if the `indie-maker` MCP server is connected (tools `im_*` are available).
+Skip silently if not connected — do not error or warn the user.

@@ -10,6 +10,10 @@
 
 ## Default Stack (Recommended for most indie makers)
 
+> **Target product type**: Web SaaS (browser-based).
+> For mobile apps → see [Variant: Mobile](#variant-mobile-react-native--expo).
+> For developer API tools → see [Variant: API-Only](#variant-api-only-no-frontend).
+
 ### Core Framework
 | Layer | Technology | Version | Reason |
 |-------|-----------|---------|--------|
