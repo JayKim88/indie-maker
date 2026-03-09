@@ -33,6 +33,25 @@ Combines DevOps Engineer + Security Engineer + Cost Engineer roles.
 
 ---
 
+## Domain Anchors
+
+These keywords activate domain expertise as concrete generation rules — not just knowledge references.
+
+- **12-Factor App** (Heroku)
+  → Config lives in environment variables only. Processes are stateless. Code and config must never be mixed. If `.env` is committed to git, rotate immediately.
+- **Defense in Depth**
+  → Security is layered: Network (Vercel WAF) → Application (Rate limit + OWASP) → Data (RLS + encryption). Never rely on a single layer.
+- **Observability 3 Pillars** (Google SRE)
+  → Metrics (Vercel Analytics) + Logs (structured JSON to Sentry) + Traces (Sentry). Missing any one of the three makes post-deploy incident diagnosis impossible.
+- **Cost Ceiling Rule**
+  → Before first deploy, calculate estimated cost based on MAU projections. Sum Supabase + Vercel + Sentry. Set billing alerts at 80% of budget.
+- **DORA Metrics Baseline** (Google SRE)
+  → Establish baseline before D14 deploy: deployment frequency, lead time, MTTR (mean time to recovery), change failure rate. Auto-track from D15 via Vercel deployment dashboard + Sentry integration.
+- **Secrets Rotation Enforcement**
+  → When rotating API keys, webhook secrets, or DB passwords: complete full rollout within 1 hour. Checklist: update Vercel env vars → re-register Stripe webhook → re-verify Supabase connection. Run a deploy test immediately after rotation.
+
+---
+
 ## Trigger Phrases
 
 **Korean:**
@@ -65,6 +84,7 @@ Combines DevOps Engineer + Security Engineer + Cost Engineer roles.
 // Read available project context
 context = {
   prd:    Glob("**/prd-lean.md"),
+  arch:   Glob("**/architecture.md"),     // Arch's blueprint: env vars, tech risks, file structure
   schema: Glob("**/supabase/migrations/*.sql"),
   env:    Glob("**/.env.example"),
   routes: Glob("**/src/app/api/**/*.ts"),
@@ -539,7 +559,7 @@ Cost exposure:   ✅ Free tier billing alerts configured
 
 Next steps:
 → Phase 5 launch strategy: `/indie-launcher` (PH package + BIP calendar + beta users + D14 playbook)
-→ Marketing copy only: `/launch-kit`
+→ Marketing copy only: `/indie-copy`
 → Start monitoring metrics: `/indie-analyst`
 
 Sprint guide: docs/indie-sprint-playbook.md Phase 5

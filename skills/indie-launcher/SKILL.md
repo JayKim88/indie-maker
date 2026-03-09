@@ -33,23 +33,44 @@ Frameworks you apply:
 - **PH algorithm model**: comment velocity, upvote timing distribution, recency penalty, golden hour importance
 - **Pre-seeding**: building community trust D1-D6 so D14 is a harvest, not a cold ask
 
+## Domain Anchors
+
+These keywords activate domain expertise as concrete generation rules — not just knowledge references.
+
+- **Launch Stacking** (multi-platform compounding)
+  → Single-channel launches are prohibited. Sequence: BetaList (D-7) → PH (D14) → Show HN (D15) → Newsletter (D16)
+- **Warm > Cold Principle**
+  → Build a warm audience via Build-in-Public D1-D13, then launch. Depending on cold traffic = failure pattern.
+- **Social Proof Flywheel**
+  → Early user reviews → landing page update → new visitors → more reviews. Secure a minimum of 3 testimonials before launch.
+- **48-hour Rule**
+  → 70% of total PH traffic arrives within 48 hours after launch. Focus on comment responses and thank-you DMs during this window.
+- **Launch Sequence Timing**
+  → Open all channels within the 24-hour window starting D14 5am UTC. Staggering channels disperses momentum. Finish pre-seeding D1-D13 and harvest on D14.
+- **Launch Attribution Matrix**
+  → utm_source required on all channels. End-of-D14 analysis: PH upvotes → signups → paid conversion rate (per channel). Launching without attribution = no data for the next launch strategy.
+- **Post-Launch Copy Velocity**
+  → Within 4 hours of D14 launch, generate 5 copy variants per channel (AI drafts). Founder edits tone and voice only. Speed is the only moment where it matters more than accuracy.
+
+---
+
 ## Purpose
 
 Phase 5 dedicated conversational launch agent.
 Covers D7-D13 launch prep sprint and D14 playbook and D14+ momentum.
 
-**Distinct from `/launch-kit`**:
-- `launch-kit` = marketing copy (landing page, IH post, Reddit post, email sequence)
+**Distinct from `/indie-copy`**:
+- `indie-copy` = CRO conversion copy (landing page, channel posts, email drip sequence)
 - `indie-launcher` = launch strategy + multi-channel stack + PH package + community + beta + social proof + D14 playbook + Plan B
 
-Run `/launch-kit` first if you haven't — indie-launcher reuses its output.
+Run `/indie-copy` first if you haven't — indie-launcher reuses its output.
 
 **Goal**: Produce two deliverables in one session:
 1. `launch-plan.md` — full launch system (channels, PH package, social proof flywheel, D7-D14 timeline, Plan B)
 2. `bip-posts.md` — Build-in-Public content drafts D7-D13 (Twitter/X, LinkedIn, Reddit, IH)
 
 **Reference documents**:
-- `landing-copy.md` or `launch-kit-output.md` — copy to reuse
+- `docs/indie-copy/landing-copy.md` + `channel-posts.md` + `email-sequence.md` — copy to reuse
 - `idea-canvas.md` — product story + target user + kill criteria
 - `prd-lean.md` — 3 core features
 
@@ -86,7 +107,7 @@ context_files = {
   canvas:       Glob("./docs/indie-planner/idea-canvas.md"),
   prd:          Glob("./docs/indie-planner/prd-lean.md"),
   landing_copy: Glob("./docs/indie-designer/landing-copy.md"),
-  launch_kit:   Glob("**/launch-kit-output.md"),
+  indie_copy:   Glob("**/docs/indie-copy/landing-copy.md"),
 }
 
 Read(all found files)
@@ -98,10 +119,10 @@ extract:
   - business_model
   - is_ai_product (affects channel selection)
 
-if landing_copy OR launch_kit found:
+if landing_copy OR indie_copy found:
   print("Found [file]. I'll reuse your existing copy as a base.")
 else:
-  print("No landing copy found. Run /launch-kit first for best results, or I'll generate basic copy.")
+  print("No landing copy found. Run /indie-copy first for best results, or I'll generate basic copy.")
 ```
 
 ---
@@ -1242,7 +1263,7 @@ After launch:
 → D14-D28 metrics: `/indie-analyst` (AARRR analysis + Kill/Go)
 
 If you need:
-→ Marketing copy: `/launch-kit`
+→ Marketing copy: `/indie-copy`
 → Pre-launch QA: `/indie-infra` (D14 checklist mode)
 ```
 
@@ -1312,8 +1333,8 @@ After saving deliverables:
 
 ```
 im_complete_task(project_id=<name>, task_key="launch-prep")
-im_upload_document(project_id=<name>, type="launch-plan", content=<launch-plan.md 전체 내용>)
-im_upload_document(project_id=<name>, type="bip-posts", content=<bip-posts.md 전체 내용>)
+im_upload_document(project_id=<name>, type="launch-plan", content=<full contents of launch-plan.md>)
+im_upload_document(project_id=<name>, type="bip-posts", content=<full contents of bip-posts.md>)
 ```
 
 Only call MCP tools if the `indie-maker` MCP server is connected (tools `im_*` are available).

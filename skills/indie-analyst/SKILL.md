@@ -28,6 +28,27 @@ metadata:
 
 ---
 
+## Domain Anchors
+
+These keywords activate domain expertise as concrete generation rules — not just knowledge references.
+
+- **OMTM** (One Metric That Matters, Lean Analytics)
+  → At Kill/Go, always select exactly 1 core metric. Selection criteria: actionable, accessible, auditable
+- **Retention Curve Shape**
+  → Flattening = PMF signal; sustained decline = Kill signal. Day-1/7/30 three-point comparison is mandatory
+- **Qualitative + Quantitative Cross-Validation**
+  → Kill/Go verdict must never be based on numbers alone. Minimum 3 user feedback quotes required
+- **Leading vs Lagging Metric Separation**
+  → Revenue/churn are lagging. Activation rate/feature adoption are leading. Diagnose leading metrics first
+- **Go Signal Strategy Map**
+  → A Go verdict must never conclude with "keep building." Must include: AARRR bottleneck-based 6-month experiment sequence + projected MRR milestones (M1/M3/M6). Go is a starting point, not a conclusion
+- **No Ambiguous Verdict Rule**
+  → If data is inconclusive for Kill/Go, issue a "Watch" verdict with specific D43 thresholds. Never offload ambiguity to the user. "More data needed" is a declaration of analysis failure
+- **Root Cause Isolation**
+  → When a metric anomaly occurs (sudden retention drop, stalled activation), never assume a single cause. Simultaneously form 3 hypotheses — product gap / onboarding error / channel mismatch — then A/B test the most verifiable one first
+
+---
+
 ## Trigger Phrases
 
 **Korean:**
@@ -180,6 +201,43 @@ Reference: `knowledge/analytics-guide.md` — Benchmarks, Cohort Analysis sectio
 ```pseudocode
 kill_criteria = load_from_idea_canvas() or use_indie_saas_defaults()
 actual_metrics = collect_from_interview()
+
+// ── Parallel Benchmark Research (launch while computing AARRR) ──
+// Launch 2 agents IN PARALLEL (single message, 2 Agent tool calls)
+// to enrich the analysis with real-time industry benchmarks.
+
+Agent(
+  subagent_type="general-purpose",
+  description="Research industry benchmarks",
+  prompt="""Research current indie SaaS benchmarks for a product in the {product_category} space.
+
+  Find real data for:
+  - Median PH upvotes for indie SaaS launches (2024-2025)
+  - Typical free→paid conversion rates for {product_category}
+  - D1/D7/D30 retention benchmarks for similar products
+  - Average ARPU range for indie SaaS in this category
+  - LTV:CAC ratio benchmarks
+
+  Use WebSearch. Cite sources (OpenView, ChartMogul, Baremetrics, ProfitWell reports).
+  Return as structured text with source URLs."""
+)
+
+Agent(
+  subagent_type="general-purpose",
+  description="Analyze comparable products",
+  prompt="""Find 3-5 comparable indie SaaS products to {product_name} in the {product_category} space.
+
+  For each comparable:
+  - Name, launch date, current MRR (if public)
+  - PH launch results (upvotes, rank)
+  - Growth trajectory (first 3-6 months)
+  - Key growth lever that worked
+
+  Use WebSearch targeting IndieHackers revenue pages, PH launch posts, Twitter threads.
+  Return as structured comparison table."""
+)
+
+// Wait for both agents, then use their data to contextualize the AARRR analysis below.
 
 // AARRR funnel analysis
 acquisition_rate    = visitors_to_signups / total_visitors

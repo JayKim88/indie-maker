@@ -41,6 +41,27 @@ Sources: Google Cloud API Design Guide, OWASP Top 10:2025, Supabase Docs, Postgr
 22. **Log server errors with context** — Log errors with: user_id (if authenticated), request path, request body (sanitized, no PII), timestamp, error message, stack trace. Use Sentry or equivalent.
 23. **Graceful degradation for external services** — When Stripe, Resend, or other external services fail, fail gracefully. Return 503 with a user-friendly message. Implement retry logic with exponential backoff for background operations.
 
+### Query Performance
+24. **Paginate all list endpoints** — No endpoint returns unbounded result sets. Use cursor-based pagination (`WHERE created_at < $cursor ORDER BY created_at DESC LIMIT 20`) for infinite scroll, or offset-based for numbered pages. Default limit: 20, max limit: 100.
+25. **Select only needed columns** — `.select('id, title, created_at')` not `.select('*')`. Selecting all columns transfers unnecessary data, prevents index-only scans, and leaks internal fields to clients. Explicit selects also serve as documentation.
+26. **N+1 queries are bugs** — If a loop executes a query per iteration, it's an N+1. Use Supabase joins (`.select('*, comments(*)')`) or batch queries. Detect N+1s by counting queries per request during development (log query count per route).
+27. **Explain before optimizing** — Run `EXPLAIN ANALYZE` on slow queries before adding indexes. Premature indexing adds write overhead. Target: single-table queries < 5ms, joined queries < 20ms. Monitor query times in production.
+
+### Testing Strategy
+28. **Every API route has a test** — Test the route handler directly: valid input returns correct status + body, invalid input returns 400/422, unauthenticated request returns 401, unauthorized access returns 403. Use Vitest + Supabase local.
+29. **Database constraints are tested** — Test that CHECK constraints reject invalid data, NOT NULL prevents missing fields, FK constraints prevent orphaned references, and RLS policies block cross-user access. If the constraint matters, it has a test.
+30. **Webhook handlers have integration tests** — Stripe webhooks are the most critical backend code. Test with mock Stripe events: checkout.session.completed creates subscription, subscription.deleted downgrades plan, invalid signature returns 400.
+
+### Resilience Patterns
+31. **Idempotent mutations** — POST endpoints that create resources should handle duplicate submissions gracefully. Use idempotency keys (Stripe provides these), unique constraints, or `INSERT ... ON CONFLICT DO NOTHING`. A user double-clicking "Pay" must not be charged twice.
+32. **Webhook retry safety** — Stripe retries failed webhooks. Webhook handlers must be idempotent: check if the action was already processed before executing. Use `stripe_sub_id` unique constraint or an event log table to prevent double-processing.
+33. **Timeout boundaries for external calls** — Set explicit timeouts on all external API calls (Stripe, Resend, third-party APIs). Default: 10s for payment APIs, 5s for email, 30s for AI/LLM calls. A missing timeout blocks the event loop indefinitely.
+
+### Observability
+34. **Structured logging, not string concatenation** — Log as structured objects: `log.error({ route: '/api/items', userId, error: err.message, duration_ms })`. Structured logs are searchable, filterable, and parseable by monitoring tools. Never log `"Error: " + err`.
+35. **Request duration tracking** — Measure and log the duration of every API request. Set alerts for p95 response time > 500ms. Track separately: DB query time, external API time, total response time. Slow endpoints are bugs.
+36. **Health check endpoint** — `GET /api/health` returns 200 with `{ status: 'ok', db: 'connected', timestamp }`. Used by uptime monitors (BetterStack) and deployment health checks. Include DB connectivity check (simple query).
+
 ---
 
 ## Supabase Project Setup
@@ -405,12 +426,32 @@ export async function POST(request: NextRequest) {
 
 Before delivering any API or database output:
 
+**Security**
 - [ ] RLS enabled on every table (`ALTER TABLE ... ENABLE ROW LEVEL SECURITY`)
 - [ ] Service Role Key used only in server files (no `NEXT_PUBLIC_` prefix)
 - [ ] All user input validated with Zod before DB operation
 - [ ] No SQL string concatenation anywhere
 - [ ] Error responses contain no stack trace or DB schema
-- [ ] HTTP status codes are semantically correct
+- [ ] Auth check at top of every protected route handler
+
+**Database**
 - [ ] FK columns have explicit indexes
 - [ ] `updated_at` trigger exists on every mutable table
-- [ ] Auth check at top of every protected route handler
+- [ ] HTTP status codes are semantically correct
+- [ ] List endpoints are paginated (no unbounded queries)
+- [ ] `.select()` specifies columns, not `*`
+
+**Performance**
+- [ ] No N+1 queries (use joins or batch)
+- [ ] External API calls have explicit timeouts
+- [ ] Mutations are idempotent (safe on retry/double-click)
+
+**Testing**
+- [ ] Every API route has tests (valid, invalid, auth)
+- [ ] Webhook handlers tested with mock events
+- [ ] DB constraints tested (RLS, CHECK, FK)
+
+**Observability**
+- [ ] Errors logged with context (userId, route, duration)
+- [ ] `/api/health` endpoint exists
+- [ ] Request duration tracked

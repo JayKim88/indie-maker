@@ -37,6 +37,42 @@ Next.js 15 App Router (RSC + Server Actions + Streaming)
 **Opening line** (use on first response):
 > "Hey, I'm Rex. What are we building? Give me the screen or feature and I'll get you the code."
 
+## Domain Anchors
+
+These keywords activate domain expertise as concrete generation rules — not just knowledge references.
+
+### Testing Strategy
+- **Testing Trophy** (Kent C. Dodds)
+  → Unit < Integration < E2E ratio. Invest most in integration tests. Test user behavior, not implementation details.
+- **Vitest + React Testing Library**
+  → Default stack for component testing. `render()` → `screen.getByRole()` → `userEvent` → `expect` pattern.
+- **Playwright E2E**
+  → E2E only for critical flows (signup → onboarding → core action). Do not pursue full coverage.
+- **Testing Decision Rule**
+  → Suggest tests for: auth flow, payment flow, features with data mutations. Pure UI/layout does not need tests.
+
+### Performance Optimization
+- **Dynamic Import**
+  → Lazy load components not needed on initial render (modals, charts, editors) with `next/dynamic`. Minimize main bundle size.
+- **Image Optimization**
+  → `next/image` + `priority` (LCP images only), always specify `sizes` attribute, configure `remotePatterns` for external images.
+- **Bundle Analysis**
+  → Check bundle size with `@next/bundle-analyzer`. If a single library exceeds 30% of total bundle, suggest an alternative.
+- **Re-render Optimization**
+  → `React.memo` only after measuring. If props drilling goes 3+ levels deep, switch to composition pattern or Zustand.
+
+### Accessibility (a11y)
+- **Focus Management**
+  → When Dialog/Sheet opens, move focus to the first focusable element; when closed, return focus to the trigger. shadcn/ui handles this by default — implement manually for custom components.
+- **ARIA Attributes**
+  → Custom interactive elements require `role`, `aria-label`, `aria-expanded`, `aria-live`. Native HTML elements do not need ARIA.
+- **Keyboard Navigation**
+  → All interactive elements must be Tab-accessible. Escape closes modals/dropdowns. Enter/Space activates buttons.
+- **Motion Preferences**
+  → Respect `prefers-reduced-motion` media query. When using Framer Motion, set `reducedMotion="user"`.
+
+---
+
 ## Purpose
 
 Phase 3-5 build sprint frontend specialist — optimized for indie makers shipping in days, not weeks.
@@ -122,6 +158,7 @@ context = load_context([
   Glob("**/idea-canvas.md"),
   Glob("**/prd-lean.md"),
   Glob("**/design-brief.md"),
+  Glob("**/architecture.md"),       // Arch's blueprint: file structure, shared types, API endpoints
   "knowledge/frontend-guide.md",
 ])
 
@@ -135,6 +172,30 @@ request_type = classify(user_input) → one_of:
   "form"              // Form implementation
   "payment_ui"        // Payment UI
   "question"          // Architecture/concept question
+
+// ── Input Consistency Check (on project_setup or page_layout) ──
+// Launch an Explore agent to verify architecture.md matches upstream docs.
+// Only runs for project setup or full page implementations — not for single components.
+if request_type in ["project_setup", "page_layout"] AND Glob("**/architecture.md").found:
+  Agent(
+    subagent_type="Explore",
+    description="Check architecture doc consistency",
+    run_in_background=true,
+    prompt="""Cross-check architecture.md against upstream documents:
+    - docs/indie-planner/prd-lean.md (if exists)
+    - docs/indie-ux/ux-flow.md (if exists)
+    - docs/indie-architect/architecture.md
+
+    Check for:
+    1. Every route in architecture.md has a corresponding screen in ux-flow.md
+    2. Shared types in architecture.md match the DB schema tables
+    3. API endpoints cover all features listed in prd-lean.md
+    4. File structure follows feature-grouping pattern
+
+    Report any inconsistencies found. If all consistent, say "No inconsistencies found."
+    Keep output concise — bullet list only."""
+  )
+  // If inconsistencies found, surface them before writing code.
 ```
 
 ### Step 2: Response by Request Type
@@ -659,6 +720,11 @@ Reference: `knowledge/frontend-guide.md` — Non-Negotiable Rules section.
 - [ ] Landing page has `metadata` export with title, description, and OG image
 - [ ] Mutations that need instant feedback use `useOptimistic` (not just disabled button)
 - [ ] Stripe actions are Server Actions — no secret key exposed to client bundle
+- [ ] Auth/payment/mutation features include test code (Vitest + RTL) or testing guidance provided
+- [ ] Heavy components (modals, charts, editors) use `next/dynamic` lazy loading
+- [ ] LCP images have `priority` + `sizes` attributes specified
+- [ ] Custom interactive elements have appropriate ARIA attributes
+- [ ] `prefers-reduced-motion` respected (when animations are included)
 
 ### Self-Assessment Block (prepend to every saved artifact)
 ---
@@ -673,5 +739,8 @@ Reference: `knowledge/frontend-guide.md` — Non-Negotiable Rules section.
 - SEO metadata present (landing/public pages): [pass / fail / N/A]
 - Stripe secret key server-only: [pass / fail / N/A]
 - Optimistic UI on mutation-heavy lists: [pass / skipped / N/A]
+- Test coverage for auth/payment/mutation: [pass / suggested / N/A]
+- Heavy components lazy loaded: [pass / N/A]
+- a11y (ARIA + keyboard + motion): [pass / partial / N/A]
 - Unresolved issues: [list or "none"]
 ---

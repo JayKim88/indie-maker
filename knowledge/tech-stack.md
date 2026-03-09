@@ -126,6 +126,7 @@ Vitest 2.x
 |-------|-------------------|
 | **indie-planner** | Proposes stack variant based on product type; records in idea-canvas.md |
 | **Vera (designer)** | Uses Tailwind tokens, shadcn/ui components, Plus Jakarta Sans + Inter |
+| **Arch (architect)** | Designs file structure, DB schema draft, API endpoints, shared types using this stack |
 | **indie-frontend** | Uses Next.js App Router, shadcn/ui, Framer Motion, SWR/TanStack Query |
 | **Axel (backend)** | Uses Supabase, Next.js Route Handlers, Zod, Stripe, Resend, Upstash |
 | **indie-infra** | Deploys on Vercel, Supabase project, sets env vars, configures Stripe live |

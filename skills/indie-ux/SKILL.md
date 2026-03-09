@@ -30,6 +30,27 @@ Frameworks you apply:
 - **Activation design** — Blank Slate → Aha Moment → Activation Event chain
 - **Task Flow analysis** — measure steps to core action; ≤3 steps is the target
 
+## Domain Anchors
+
+These keywords activate domain expertise as concrete generation rules — not just knowledge references.
+
+- **Jobs-to-be-Done** (Clayton Christensen)
+  → Map every key screen to a Job using the format: "When [situation X], I want to [do Y], so that I can [achieve Z]." Any screen without a mapped Job is a deletion candidate.
+- **Fogg Behavior Model** (B.J. Fogg)
+  → Behavior = Motivation × Ability × Trigger. In onboarding, maximize Ability (remove friction) so that Trigger becomes effective.
+- **Kano Model** (Noriaki Kano)
+  → Classify features as Basic (absence causes dissatisfaction) / Performance (more is better) / Delighter (exceeds expectations). MVP scope: Basic 100% + exactly 1 Performance feature.
+- **Onboarding Activation Chain**
+  → Blank Slate → Sample content/guide → First action → Aha Moment → Habit formation. Explicitly label which stage of this chain each onboarding screen belongs to.
+- **User Research Before Flows**
+  → Before writing ux-flow.md, conduct 15-minute discovery interviews with 3 target personas. ux-flow.md must cite observed mental models and task patterns. Base the flow on "how users actually behave" — not on "the flow we assumed."
+- **Activation Validation Gate**
+  → Pre-launch validation: test whether 3 target users can reach the Aha Moment within 10 minutes of signing up, unmoderated. If fewer than 2 out of 3 succeed, redesign onboarding and re-validate.
+- **Wireframe Validation Metric**
+  → Track cohort activation rate post-launch. If below 40%, trigger onboarding flow redesign. Judge UX performance using leading indicators (activation rate), not lagging indicators (retention).
+
+---
+
 ## Purpose
 
 Phase 1.5 dedicated conversational UX agent.
@@ -96,6 +117,28 @@ else:
 
 if context_files.ux.found:
   print("⚠️ ux-flow.md already exists. Shall we review and revise, or start fresh?")
+
+// ── Input Consistency Check (background) ──────────────
+// Launch an Explore agent to verify upstream documents are consistent.
+// Runs in background — does not block the interactive flow.
+if context_files.prd.found:
+  Agent(
+    subagent_type="Explore",
+    description="Check upstream doc consistency",
+    run_in_background=true,
+    prompt="""Cross-check these upstream documents for consistency:
+    - docs/indie-planner/idea-canvas.md (if exists)
+    - docs/indie-planner/prd-lean.md
+
+    Check for:
+    1. Feature list in prd-lean.md matches idea-canvas.md's scope
+    2. Target user description is consistent across both files
+    3. Business model / kill criteria align
+
+    Report any inconsistencies found. If all consistent, say "No inconsistencies found."
+    Keep output concise — bullet list only."""
+  )
+  // If inconsistencies found when agent completes, surface them before Step 7 (wireframes).
 ```
 
 ---
@@ -806,7 +849,7 @@ indie-designer (Vera) will auto-read ux-flow.md and wireframes.md:
 Next:
 → Phase 2 Visual Design: `/indie-designer`
 → Need to revisit planning: `/indie-planner`
-→ Want deeper marketing copy: `/launch-kit`
+→ Want deeper marketing copy: `/indie-copy`
 ```
 
 ---
@@ -874,14 +917,14 @@ After saving deliverables:
 
 1. Read `.indie-maker` file in the **current directory** to get the project name.
    - If the file doesn't exist, skip MCP calls and inform the user:
-     > "웹 앱 동기화를 사용하려면 프로젝트 루트에 `.indie-maker` 파일을 만들고 웹 앱 프로젝트 이름을 한 줄로 입력하세요."
+     > "To use web app sync, create a `.indie-maker` file in the project root and enter the web app project name on a single line."
 
 2. Call MCP tools using the project name as `project_id`:
 
 ```
 im_complete_task(project_id=<name>, task_key="ux-sprint")
-im_upload_document(project_id=<name>, type="ux-flow", content=<ux-flow.md 전체 내용>)
-im_upload_document(project_id=<name>, type="wireframes", content=<wireframes.md 전체 내용>)
+im_upload_document(project_id=<name>, type="ux-flow", content=<full contents of ux-flow.md>)
+im_upload_document(project_id=<name>, type="wireframes", content=<full contents of wireframes.md>)
 ```
 
 Only call MCP tools if the `indie-maker` MCP server is connected (tools `im_*` are available).

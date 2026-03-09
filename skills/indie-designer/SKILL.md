@@ -36,6 +36,25 @@ Combines Design Lead + UI Designer + Conversion Designer roles.
 
 ---
 
+## Domain Anchors
+
+These keywords activate domain expertise as concrete generation rules — not just knowledge references.
+
+- **Gestalt Principles** (Wertheimer, Köhler)
+  → Group related elements using proximity. Maintain visual consistency using similarity. Always apply when deciding component spacing.
+- **F-Pattern / Z-Pattern** (Nielsen Norman Group)
+  → Content-dense pages (dashboard, blog) = F-pattern. Landing pages (hero + CTA) = Z-pattern. Place important elements along the visual scan path.
+- **Visual Hierarchy**
+  → Establish priority order: size > weight > color > position. Determine hierarchy before working on style details.
+- **Hick's Law Applied to Navigation**
+  → Enforce navigation items ≤ 5. More choices = logarithmically longer decision time. Group or hide in dropdowns when reaching 6 or more.
+- **Design Test Requirement**
+  → All major design decisions (navigation structure, CTA color, onboarding flow) must be validated. Pre-launch = 3-person guerrilla usability test (15 min). Post-launch = A/B test. "Looks good" is not validation.
+- **Design Handoff Automation**
+  → design-brief.md must be written at a level that is immediately applicable to code. Required inclusions: hex + Tailwind class for all colors, explicit font weights, 8px-multiple spacing, component sizes. Rex and Axel must be able to implement from design-brief.md alone.
+
+---
+
 ## Trigger Phrases
 
 **Korean:**
@@ -98,6 +117,31 @@ Decision hierarchy: UX architecture > design style
 UX onboarding strategy: [onboarding_strategy]
 → This strategy will be reflected in landing and onboarding design. Do not redesign independently.
     """)
+
+// ── Input Consistency Check (background) ──────────────
+// Launch an Explore agent to verify upstream documents are consistent.
+// Runs in background — does not block the interactive flow.
+if context_files.prd.found OR context_files.ux_flow.found:
+  Agent(
+    subagent_type="Explore",
+    description="Check upstream doc consistency",
+    run_in_background=true,
+    prompt="""Cross-check these upstream documents for consistency:
+    - docs/indie-planner/idea-canvas.md (if exists)
+    - docs/indie-planner/prd-lean.md (if exists)
+    - docs/indie-ux/ux-flow.md (if exists)
+    - docs/indie-ux/wireframes.md (if exists)
+
+    Check for:
+    1. Feature list in prd-lean.md matches screens in ux-flow.md
+    2. Screen count in ux-flow.md matches wireframe count in wireframes.md
+    3. Navigation architecture is consistent between ux-flow.md and wireframes.md
+    4. Target user description is consistent across all files
+
+    Report any inconsistencies found. If all consistent, say "No inconsistencies found."
+    Keep output concise — bullet list only."""
+  )
+  // If inconsistencies found when agent completes, surface them before Step 6 (save).
 
 // Determine product type for design personality
 // Reference: knowledge/full-stack-designer.md — Section 1: Product Type Context Matrix
@@ -205,11 +249,11 @@ A few questions to write the landing page copy:
 
 1. Main target (describe one specific person): ?
 2. Core value (single biggest benefit your product delivers): ?
-3. Have you already run launch-kit? (y/n)
+3. Have you already run indie-copy? (y/n)
 ```
 
-*If launch-kit already run: copy already exists — suggest visual structure only*
-*If not run: draft basic copy, then recommend running launch-kit*
+*If indie-copy already run: copy already exists — suggest visual structure only*
+*If not run: draft basic copy, then recommend running indie-copy*
 
 **Copy Draft:**
 ```markdown
@@ -413,7 +457,7 @@ Next steps:
 → Start building: `/indie-frontend` (frontend)
    or `/indie-backend` (start with DB/backend design)
 
-→ Develop marketing copy further: `/launch-kit`
+→ Develop marketing copy further: `/indie-copy`
 
 Ask me if you need a Tailwind config example or a v0.dev component prompt.
 ```
@@ -425,7 +469,7 @@ Ask me if you need a Tailwind config example or a v0.dev component prompt.
 - Every design decision comes **with a reason** — cite psychology or CRO principle (Hick's Law, F-pattern, social proof, etc.)
 - After choosing a color, always state the contrast ratio against white
 - Offer v0.dev prompts: "Want a v0.dev prompt for this component?" — use templates from `knowledge/full-stack-designer.md` Section 10
-- Clearly distinguish from launch-kit: this skill = visual structure + design system; launch-kit = marketing copy depth
+- Clearly distinguish from indie-copy: this skill = visual structure + design system; indie-copy = CRO conversion copy depth
 - Status indicators (error, success, warning): always pair color with an icon — never color alone
 - When reviewing existing designs: use Critique Framework from `knowledge/full-stack-designer.md` Section 11
 - Microcopy (errors, empty states, buttons): reference `knowledge/full-stack-designer.md` Section 5 — never leave copy as "[placeholder]"
@@ -476,8 +520,8 @@ After saving deliverables:
 
 ```
 im_complete_task(project_id=<name>, task_key="design-sprint")
-im_upload_document(project_id=<name>, type="design-brief", content=<design-brief.md 전체 내용>)
-im_upload_document(project_id=<name>, type="landing-copy", content=<landing-copy.md 전체 내용>)
+im_upload_document(project_id=<name>, type="design-brief", content=<full content of design-brief.md>)
+im_upload_document(project_id=<name>, type="landing-copy", content=<full content of landing-copy.md>)
 ```
 
 Only call MCP tools if the `indie-maker` MCP server is connected (tools `im_*` are available).

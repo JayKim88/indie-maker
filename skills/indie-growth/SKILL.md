@@ -38,6 +38,27 @@ Frameworks you apply:
 - **Growth Accounting (MRR decomposition)**: New MRR + Expansion MRR − Churned MRR − Contraction MRR = Net New MRR — reveals whether growth is acquisition-dependent or product-led
 - **Product-Led Growth (PLG)**: usage triggers → in-app upgrade prompts; feature gating; milestone-based conversion design
 
+## Domain Anchors
+
+These keywords activate domain expertise as concrete generation rules — not just knowledge references.
+
+- **Retention-First Rule** (Brian Balfour)
+  → If Day-7 retention < 25%, halt all acquisition experiments. Do not pour water into a leaky bucket.
+- **North Star Metric Framework** (Amplitude)
+  → NSM = breadth (number of users) × depth (frequency of core action) × frequency (repetition cycle). Decompose into 3 components, then diagnose the bottleneck.
+- **Payback Period**
+  → Calculate CAC recovery period. Indie benchmark: ≤ 3 months. If exceeded, switch channel or raise price.
+- **Atomic Network** (Andrew Chen, Cold Start Problem)
+  → For network-effect products, define the minimum viable network size and grow in that unit.
+- **Revenue-Tied Experiment Framework**
+  → Every experiment hypothesis must include an MRR impact prediction. Example: "Adding this feature is expected to increase LTV by $X → MRR by N%." Experiments without MRR linkage are excluded from the queue.
+- **14-Day Experiment Rule**
+  → Every growth experiment must reach a conclusion within 14 days. Open-ended experiments are an excuse to procrastinate. Check intermediate data at D7 — if the trend is negative, terminate early.
+- **Monetization Bottleneck Audit**
+  → Required check before scaling acquisition channels: if free→paid conversion < 2%, stop channel expansion and fix pricing or paywall placement first. Do not pour water into a leaky bucket.
+
+---
+
 ## Purpose
 
 Phase 8+ dedicated growth agent. Activates after indie-analyst "Go" verdict.
@@ -414,10 +435,95 @@ if expansion_mrr_ratio > 20%:
 
 Select ONE channel to validate before expanding. Not two, not three.
 
+```pseudocode
+// ── Parallel Channel Scoring (3 batches) ──────────────
+// Launch 3 agents IN PARALLEL (single message, 3 Agent tool calls).
+// Each agent scores a batch of channels for the specific product + target user.
+
+Agent(
+  subagent_type="general-purpose",
+  description="Score channels batch 1 (organic)",
+  prompt="""Score these 7 acquisition channels for {product_name} targeting {target_user}.
+
+  Channels to score (1-5 each dimension):
+  1. Content/SEO
+  2. Twitter/X organic
+  3. Product Hunt organic (ongoing)
+  4. Community/Forums
+  5. Developer communities
+  6. YouTube/video
+  7. Viral/WOM mechanics
+
+  Scoring criteria:
+  - Relevance (1-5): is the target user HERE?
+  - Reach (1-5): addressable audience size for this stage
+  - Cost (1-5): time + money for a test (5 = cheapest)
+  - Speed (1-5): how fast can you see signal? (5 = fastest)
+
+  Context: {product_category}, {business_model}, current MRR ${current_mrr}
+
+  Use WebSearch to verify where {target_user} actually spends time.
+  Return a markdown table with scores + 1-line rationale per channel.
+  Also note any channel-specific tips for this product type."""
+)
+
+Agent(
+  subagent_type="general-purpose",
+  description="Score channels batch 2 (paid+outbound)",
+  prompt="""Score these 6 acquisition channels for {product_name} targeting {target_user}.
+
+  Channels to score (1-5 each dimension):
+  1. Paid Search (Google)
+  2. Paid Social (Meta/LinkedIn)
+  3. Cold email
+  4. LinkedIn DM outreach
+  5. Direct sales
+  6. Influencer/newsletter
+
+  Scoring criteria:
+  - Relevance (1-5): is the target user HERE?
+  - Reach (1-5): addressable audience size for this stage
+  - Cost (1-5): time + money for a test (5 = cheapest)
+  - Speed (1-5): how fast can you see signal? (5 = fastest)
+
+  Context: {product_category}, {business_model}, current MRR ${current_mrr}
+
+  Use WebSearch to find CAC benchmarks for {product_category} on each channel.
+  Return a markdown table with scores + 1-line rationale per channel."""
+)
+
+Agent(
+  subagent_type="general-purpose",
+  description="Score channels batch 3 (partnerships+other)",
+  prompt="""Score these 6 acquisition channels for {product_name} targeting {target_user}.
+
+  Channels to score (1-5 each dimension):
+  1. Partnerships
+  2. Referral program
+  3. App stores (if applicable)
+  4. PR/media
+  5. Integrations (marketplace)
+  6. Events/conferences
+
+  Scoring criteria:
+  - Relevance (1-5): is the target user HERE?
+  - Reach (1-5): addressable audience size for this stage
+  - Cost (1-5): time + money for a test (5 = cheapest)
+  - Speed (1-5): how fast can you see signal? (5 = fastest)
+
+  Context: {product_category}, {business_model}, current MRR ${current_mrr}
+
+  Use WebSearch to find examples of {product_category} products succeeding on each channel.
+  Return a markdown table with scores + 1-line rationale per channel."""
+)
+
+// Wait for all 3 agents, then merge into the full 19-channel table below.
+```
+
 ```
 ## Channel Selection (Bull's Eye)
 
-**Phase 1: Full channel scan** (19 channels → score each)
+**Phase 1: Full channel scan** (19 channels — scored by 3 parallel research agents)
 
 Scoring criteria for each channel (1-5 scale):
 - Relevance: is your target user HERE?

@@ -3,6 +3,50 @@
 > **Project**: `/Users/jaykim/Documents/Projects/indie-maker`
 > **Scope**: `skills/`, `CLAUDE.md`, `knowledge/`, `.gitignore`
 
+## Session: 2026-03-09 23:19
+
+> **Context**: Added Domain Anchors to all 14 SKILL.md files (keyword + application rule pattern), ran gap analysis against 14 senior JD requirement docs, applied Critical + High gaps, then translated all 26 skill/knowledge files from Korean to English (instruction content only; Korean trigger phrases preserved).
+
+### Done
+
+- feat(skills/\*): added `## Domain Anchors` section to all 14 SKILL.md files — keyword + `→` application rule pattern to activate Claude's training knowledge consistently
+- feat(skills/indie-market-researcher): anchors — Positioning Canvas, Demand Signal Scoring, TAM/SOM Realism, Blue Ocean Strategy, Strategic Framing Rule, AI-Critical Synthesis
+- feat(skills/indie-planner): anchors — Opportunity Score, Assumption Mapping, RAT, One-line Value Prop, Founding Narrative, Kill Criteria Data Validation
+- feat(skills/indie-analyst): anchors — OMTM, Retention Curve Shape, Qualitative+Quantitative cross-validation, Leading vs Lagging, Go Signal Strategy Map, No Ambiguous Verdict Rule, Root Cause Isolation
+- feat(skills/indie-growth): anchors — Retention-First Rule, NSM Framework, Payback Period, Atomic Network, Revenue-Tied Experiment Framework, 14-Day Experiment Rule, Monetization Bottleneck Audit
+- feat(skills/indie-retro): anchors — Pre-mortem Inversion, Survivorship Bias Warning, Assumption Autopsy, Portable Lesson Test
+- feat(skills/indie-monetize): anchors — Value Metric Alignment, Decoy Effect, Van Westendorp, First Dollar Principle, AI Cost Model, Freemium Trigger Threshold
+- feat(skills/indie-launcher): anchors — Launch Stacking, Warm>Cold, Social Proof Flywheel, 48-hour Rule, Launch Sequence Timing, Launch Attribution Matrix, Post-Launch Copy Velocity
+- feat(skills/indie-architect): anchors — Feature Co-location, 200 LOC Rule, Single Source of Truth, Vertical Slice Architecture, ADR, AI Budget Ceiling
+- feat(skills/indie-frontend): anchors — Testing Trophy, Vitest+RTL, Playwright E2E, Testing Decision Rule, Dynamic Import, Image Optimization, Bundle Analysis, Re-render Optimization, Focus Management, ARIA Attributes, Keyboard Navigation, Motion Preferences; Quality Gate expanded with 5 Should Pass + 3 Self-Assessment items
+- feat(skills/indie-backend): anchors — OWASP Top 10, RLS-First Design, Idempotency Key Pattern, Rate Limiting Hierarchy, Token Budget Enforcement, Structured Logging Rule
+- feat(skills/indie-infra): anchors — 12-Factor App, Defense in Depth, Observability 3 Pillars, Cost Ceiling Rule, DORA Metrics Baseline, Secrets Rotation Enforcement
+- feat(skills/indie-copy): anchors — PAS/AIDA/4U/BAB, Loss Aversion, Specificity Rule, Cognitive Ease, Copy-to-Revenue Tracing, AI Copy Quality Gate
+- feat(skills/indie-designer): anchors — Gestalt Principles, F/Z-Pattern, Visual Hierarchy, Hick's Law Navigation, Design Test Requirement, Design Handoff Automation
+- feat(skills/indie-ux): anchors — JTBD, Fogg Behavior Model, Kano Model, Onboarding Activation Chain, User Research Before Flows, Activation Validation Gate, Wireframe Validation Metric
+- docs(docs/senior-requirements/): 14 JD analysis files created (1:1 skill mapping) covering Hard Skills, Senior Differentiators, Trend Keywords — used as gap analysis source
+- feat(skills/\*): applied Critical gap items from senior JD analysis across all 14 skills
+- feat(skills/\*): applied High gap items (15 total) from senior JD analysis across all 14 skills
+- chore(skills/\*): translated all 14 SKILL.md instruction content from Korean to English (trigger phrases kept in Korean)
+- chore(knowledge/analytics-guide.md): translated final Korean section ("Nova's Analytical Limitations") to English
+- chore(knowledge/\*): confirmed 11 other knowledge files already fully in English — no changes needed
+
+### Decisions
+
+- **Domain Anchors pattern**: keyword + source + `→` application rule (1 line per anchor). Rationale: naming a framework is weak; embedding it as a generation rule is strong — activates Claude's existing training knowledge consistently without requiring full framework extraction.
+- **Gap analysis workflow**: scan senior JD requirements → compare against existing SKILL.md anchors → classify Critical/High/Low → implement Critical first, then High. Low gaps deferred.
+- **Trend Keyword filtering**: only extract if (a) indie-context-scoped insight different from general knowledge, AND (b) confirmed trend — not `[SPECULATIVE]` labeled. Speculative or enterprise-only trends excluded.
+- **English translation scope**: all system instructions, Domain Anchors rules, section headers → English. Korean trigger phrases (user-typed input words) and user-facing dialogue prompts → Korean preserved. Rationale: Korean UTF-8 uses 1.5-2.5x more tokens than equivalent English; English has tighter pattern matching for technical framework names.
+
+### Next
+
+- [ ] Run pipeline test with a standard SaaS fixture to verify Domain Anchors activate correctly in generated output
+- [ ] Commit all changes (Domain Anchors + gap fills + English translation) with conventional commit messages
+- [ ] Review indie-monetize SKILL.md completeness (Finn persona, pricing-strategy.md template) — carried from previous Next
+- [ ] Run second pipeline test with standard web SaaS fixture (verify indie-backend P0-3 routing) — carried from previous Next
+
+---
+
 ## Session: 2026-03-07 22:49
 
 > **Context**: Standardized project output structure to `docs/{skill}/` paths, added indie-monetize skill (12th), expanded indie-launcher Community Channel Deep Dive, unified Glob paths across all SKILL.md files.

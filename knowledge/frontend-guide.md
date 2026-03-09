@@ -38,9 +38,40 @@ Sources: Vercel Engineering Blog, Airbnb React Style Guide, React Docs, WCAG 2.1
 17. **Naming conventions** — Components: PascalCase. Functions/variables: camelCase. Files: kebab-case for non-component files, PascalCase.tsx for component files. Event handlers: `handleEventName` (handleSubmit, handleClick).
 18. **No prop drilling beyond 2 levels** — If a prop is passed through 3+ components without being used, extract to context or co-locate state closer to where it's needed.
 
-### Performance
+### Performance & Rendering Optimization
 19. **Core Web Vitals are shipping criteria** — LCP (Largest Contentful Paint) ≤ 2.5s. INP (Interaction to Next Paint) ≤ 200ms. CLS (Cumulative Layout Shift) ≤ 0.1. Check with Vercel Speed Insights or Lighthouse. These metrics affect SEO and user retention.
 20. **Dynamic imports for heavy components** — Large charts, rich text editors, video players: use `next/dynamic` with `{ ssr: false }` for client-only or `loading: () => <Skeleton />` for lazy loading. Reduces initial bundle size.
+21. **Prevent unnecessary re-renders** — Memoize expensive computations with `useMemo`, stable callbacks with `useCallback` (only when passed to memoized children or in dependency arrays). Extract static objects/arrays outside the component body. Use React DevTools Profiler to verify — don't guess, measure.
+22. **Image optimization is non-negotiable** — All images use `next/image` with explicit `width`/`height` or `fill` + `sizes` attribute. Above-the-fold images get `priority`. Use WebP/AVIF via Next.js automatic format negotiation. Unoptimized images are the #1 cause of poor LCP.
+23. **Bundle analysis before every launch** — Run `npx @next/bundle-analyzer` to identify oversized dependencies. Tree-shake aggressively: import `{ specific }` from library, never `import *`. Target < 100KB First Load JS per route. Replace moment.js with date-fns, lodash with lodash-es or native methods.
+24. **Font loading strategy** — Use `next/font` for self-hosted fonts (eliminates external network request). Set `display: 'swap'` to prevent FOIT (Flash of Invisible Text). Preload only the weights actually used (400, 500, 700 — not all 9 weights).
+
+### Testing Strategy
+25. **Test the user, not the implementation** — Tests verify behavior from the user's perspective. Query by role, label, or text — never by CSS class or test ID (unless no accessible alternative). If a test breaks when refactoring internals without changing behavior, the test is wrong.
+26. **Test pyramid: unit → integration → e2e** — Unit tests (Vitest): pure functions, utils, Zod schemas, hooks. Integration tests (Testing Library): component renders with props, form submissions, conditional rendering. E2e tests (Playwright): critical user flows only (signup → onboard → pay → use core feature). Ratio: 60% unit, 30% integration, 10% e2e.
+27. **Every user-facing form has a test** — Forms are the primary interaction surface. Test: valid submission succeeds, invalid input shows error messages, submit button disables during pending state, server error displays user-friendly message.
+28. **Snapshot tests are banned** — Snapshot tests break on every UI change, provide no behavioral confidence, and teach developers to blindly update snapshots. Use explicit assertions on visible text, ARIA roles, and DOM structure instead.
+
+### State Management Architecture
+29. **State colocation first** — Keep state as close to where it's used as possible. Component-local `useState` → lift to parent → React Context → Zustand. Each escalation adds complexity; justify it before moving up.
+30. **Server state ≠ client state** — Server data (DB records, API responses) managed by Server Components or TanStack Query/SWR. Client state (UI toggles, form drafts, modals) managed by useState/Zustand. Never put server data in Zustand — it creates stale data bugs.
+31. **Zustand store design: one store per domain** — If using Zustand, create domain-specific stores (`useCartStore`, `useUIStore`), not one monolithic store. Each store should have < 10 state fields. If a store exceeds this, it likely mixes concerns.
+
+### Component Design Principles
+32. **Composition over configuration** — Prefer `<Card><CardHeader /><CardBody /></Card>` over `<Card header={...} body={...} />`. Composition is more flexible, easier to extend, and matches shadcn/ui patterns. Configuration props (variant, size) are fine for leaf components.
+33. **Component size limit: 200 lines** — A component file exceeding 200 lines is doing too much. Extract sub-components, custom hooks, or utility functions. The exception: page files that compose multiple sections (these are orchestrators, not logic holders).
+34. **Custom hooks extract behavior, not JSX** — A hook returns data and handlers, never JSX elements. `useAuth()` returns `{ user, signOut }`. `useForm()` returns `{ register, handleSubmit, errors }`. If a hook returns JSX, it should be a component.
+35. **Prop interfaces are explicit contracts** — Every component's props interface is defined with TypeScript `interface`. Use `Pick<>`, `Omit<>`, and intersection types to derive props from existing types. Never use `Record<string, any>` or inline object types for props.
+
+### Accessibility (WCAG 2.1 AA — Extended)
+36. **Color contrast ratio ≥ 4.5:1 for text** — All text must meet WCAG AA contrast ratios: 4.5:1 for normal text, 3:1 for large text (18px+ or 14px+ bold). Use browser DevTools contrast checker. Don't rely on color alone to convey information (add icons/text).
+37. **Focus management on route changes** — When navigating between pages, focus should move to the main content area or page heading. In modals/drawers, trap focus inside and return focus to the trigger element on close. Test with Tab key only — no mouse.
+38. **Reduced motion support** — Wrap all animations in `prefers-reduced-motion` media query or use Framer Motion's `useReducedMotion` hook. Users with vestibular disorders experience nausea from unexpected motion. CSS: `@media (prefers-reduced-motion: reduce) { animation: none; }`.
+
+### Observability
+39. **Sentry error boundary integration** — Configure Sentry in `instrumentation.ts` (Next.js 15+). Every `error.tsx` boundary should call `Sentry.captureException(error)`. Tag errors with user_id and page route for debugging context. Set up source maps upload in CI.
+40. **Web Vitals reporting** — Use `next/web-vitals` or Vercel Speed Insights to track LCP, INP, CLS per route in production. Set up alerts for regressions: LCP > 3s or CLS > 0.15 triggers investigation. Measure real user metrics, not just Lighthouse scores.
+41. **Structured client-side logging** — Use a logging utility (not raw `console.log`) that includes: timestamp, component name, action, and relevant data. In production, pipe to an error tracking service. Strip verbose debug logs in production builds.
 
 ---
 
@@ -1283,15 +1314,548 @@ export function DeletableItemList({ initialItems }: { initialItems: Item[] }) {
 
 Before delivering any code output:
 
+**Correctness**
 - [ ] No `any` TypeScript types
-- [ ] No raw `<img>` tags — `next/image` used
+- [ ] All form inputs validated with Zod schema
+- [ ] `'use client'` only at leaf nodes needing interactivity
+- [ ] No secrets in client-accessible code (no `NEXT_PUBLIC_` for private keys)
+
+**UI Quality**
+- [ ] No raw `<img>` tags — `next/image` used with explicit dimensions
 - [ ] No `<div onClick>` — semantic `<button>` or `<a>` used
 - [ ] Loading state present for every async operation
 - [ ] Error boundary (`error.tsx`) at page level
 - [ ] Empty state for all data-driven lists/dashboards
-- [ ] All form inputs validated with Zod schema
-- [ ] `'use client'` only at leaf nodes needing interactivity
-- [ ] No secrets in client-accessible code (no `NEXT_PUBLIC_` for private keys)
+
+**Performance**
+- [ ] Dynamic imports for components > 50KB
+- [ ] No unnecessary re-renders (memoize where measured)
+- [ ] Fonts loaded via `next/font`
+- [ ] Images above-the-fold have `priority` attribute
+
+**Testing**
+- [ ] User-facing forms have integration tests
+- [ ] Critical flow has e2e test (signup → core action)
+- [ ] No snapshot tests
+
+**Accessibility**
+- [ ] Keyboard navigation works for all interactive elements
+- [ ] Color contrast ≥ 4.5:1 for text
+- [ ] Animations respect `prefers-reduced-motion`
+
+**Observability**
+- [ ] Error boundaries report to Sentry
+- [ ] Web Vitals tracked in production
+
+---
+
+## Pre-Launch Performance Checklist
+
+Actionable checklist to run before every deploy. Supplements the Non-Negotiable Rules with hands-on verification steps.
+
+### Image Optimization
+
+```bash
+# Check for unoptimized images in the build
+npx @next/bundle-analyzer
+```
+
+- [ ] All `<Image>` tags have explicit `width`/`height` or `fill` + `sizes`
+- [ ] Above-the-fold images have `priority` attribute
+- [ ] Large hero images use `placeholder="blur"` with `blurDataURL`
+- [ ] No images > 200KB — compress with Squoosh or use WebP/AVIF via Next.js
+- [ ] Lazy-loaded images below the fold (default behavior with `next/image`)
+
+### Code Splitting & Bundle
+
+- [ ] Run `npx @next/bundle-analyzer` — no single chunk > 100KB First Load JS
+- [ ] Heavy components (charts, editors, maps) use `next/dynamic` with loading skeleton
+- [ ] Tree-shake: `import { specific }` not `import *` from large libraries
+- [ ] No `moment.js` — use `date-fns` or native `Intl.DateTimeFormat`
+- [ ] No full `lodash` — use `lodash-es` specific imports or native methods
+
+### Layout Shift Prevention
+
+- [ ] All images have explicit dimensions (prevents CLS)
+- [ ] Fonts loaded via `next/font` with `display: 'swap'` (prevents FOIT)
+- [ ] Skeleton loaders match the visual shape of real content
+- [ ] No dynamic content injection above the fold after initial paint
+
+### React Re-render Optimization
+
+```typescript
+// Diagnose: React DevTools Profiler → Highlight updates → interact with the page
+// Common fixes:
+
+// 1. Extract static objects outside component body
+const FILTER_OPTIONS = ['all', 'active', 'archived'] as const  // ✅ outside
+
+// 2. Memoize expensive computations
+const sortedItems = useMemo(
+  () => items.toSorted((a, b) => b.score - a.score),
+  [items]
+)
+
+// 3. Stable callbacks for memoized children
+const handleSelect = useCallback((id: string) => {
+  setSelectedId(id)
+}, [])
+```
+
+- [ ] No object/array literals in JSX props (creates new reference every render)
+- [ ] `useMemo` for expensive computations (sorting, filtering large lists)
+- [ ] `useCallback` only when passed to `React.memo` children or in dependency arrays
+- [ ] Verified with React DevTools Profiler — don't guess, measure
+
+### Core Web Vitals Verification
+
+```bash
+# Local check
+npx lighthouse http://localhost:3000 --view
+
+# Production check
+# Vercel Speed Insights or PageSpeed Insights
+```
+
+- [ ] LCP ≤ 2.5s (check largest element — usually hero image or heading)
+- [ ] CLS ≤ 0.1 (check for layout shifts — images, fonts, dynamic content)
+- [ ] INP ≤ 200ms (check for slow interactions — form submissions, navigation)
+
+### Caching Strategy
+
+- [ ] Static pages use `generateStaticParams` where applicable
+- [ ] API-heavy pages use `revalidate` or `unstable_cache` with appropriate TTL
+- [ ] `Cache-Control` headers set for public assets via `next.config.js`
+
+---
+
+## Testing Setup & Patterns
+
+Concrete setup and code patterns for Vitest (unit/integration) and Playwright (e2e). Supplements the Non-Negotiable Rules (rules 25-28) with copy-paste-ready code.
+
+### Vitest Setup
+
+```bash
+npm install -D vitest @testing-library/react @testing-library/jest-dom @testing-library/user-event @vitejs/plugin-react jsdom msw
+```
+
+```typescript
+// vitest.config.ts
+import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react'
+import path from 'path'
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    globals: true,
+    css: false,
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+})
+```
+
+```typescript
+// src/test/setup.ts
+import '@testing-library/jest-dom/vitest'
+import { cleanup } from '@testing-library/react'
+import { afterEach } from 'vitest'
+
+afterEach(() => {
+  cleanup()
+})
+```
+
+### Unit Test: Utility Functions & Zod Schemas
+
+```typescript
+// src/lib/__tests__/utils.test.ts
+import { describe, it, expect } from 'vitest'
+import { formatDate, formatPrice } from '@/lib/utils'
+
+describe('formatDate', () => {
+  it('formats ISO date string to readable format', () => {
+    expect(formatDate('2024-01-15')).toBe('January 15, 2024')
+  })
+})
+
+describe('formatPrice', () => {
+  it('converts cents to USD string', () => {
+    expect(formatPrice(2999)).toBe('$29.99')
+  })
+
+  it('handles zero', () => {
+    expect(formatPrice(0)).toBe('$0.00')
+  })
+})
+```
+
+```typescript
+// src/lib/__tests__/schemas.test.ts
+import { describe, it, expect } from 'vitest'
+import { createItemSchema } from '@/lib/schemas'
+
+describe('createItemSchema', () => {
+  it('accepts valid input', () => {
+    const result = createItemSchema.safeParse({ title: 'My Item' })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects empty title', () => {
+    const result = createItemSchema.safeParse({ title: '' })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects title over 200 chars', () => {
+    const result = createItemSchema.safeParse({ title: 'a'.repeat(201) })
+    expect(result.success).toBe(false)
+  })
+})
+```
+
+### Integration Test: Form Component
+
+```typescript
+// src/components/features/items/__tests__/create-item-form.test.tsx
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { CreateItemForm } from '../create-item-form'
+
+// Mock Supabase client
+vi.mock('@/lib/supabase/client', () => ({
+  createClient: () => ({
+    from: () => ({
+      insert: vi.fn().mockResolvedValue({ error: null }),
+    }),
+  }),
+}))
+
+// Mock next/navigation
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    refresh: vi.fn(),
+    push: vi.fn(),
+  }),
+}))
+
+describe('CreateItemForm', () => {
+  it('submits valid form data', async () => {
+    const user = userEvent.setup()
+    render(<CreateItemForm />)
+
+    await user.type(screen.getByLabelText(/title/i), 'New Item')
+    await user.click(screen.getByRole('button', { name: /add item/i }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('button')).not.toBeDisabled()
+    })
+  })
+
+  it('shows validation error for empty title', async () => {
+    const user = userEvent.setup()
+    render(<CreateItemForm />)
+
+    await user.click(screen.getByRole('button', { name: /add item/i }))
+
+    expect(await screen.findByText(/title is required/i)).toBeInTheDocument()
+  })
+
+  it('disables submit button while pending', async () => {
+    const user = userEvent.setup()
+    render(<CreateItemForm />)
+
+    await user.type(screen.getByLabelText(/title/i), 'New Item')
+    await user.click(screen.getByRole('button', { name: /add item/i }))
+
+    // Button should be disabled during submission
+    expect(screen.getByRole('button')).toBeDisabled()
+  })
+})
+```
+
+### MSW (Mock Service Worker) for API Mocking
+
+```typescript
+// src/test/mocks/handlers.ts
+import { http, HttpResponse } from 'msw'
+
+export const handlers = [
+  http.get('/api/items', () => {
+    return HttpResponse.json([
+      { id: '1', title: 'Item 1', status: 'active' },
+      { id: '2', title: 'Item 2', status: 'archived' },
+    ])
+  }),
+
+  http.post('/api/items', async ({ request }) => {
+    const body = await request.json()
+    return HttpResponse.json({ id: '3', ...body }, { status: 201 })
+  }),
+]
+```
+
+```typescript
+// src/test/mocks/server.ts
+import { setupServer } from 'msw/node'
+import { handlers } from './handlers'
+
+export const server = setupServer(...handlers)
+```
+
+```typescript
+// src/test/setup.ts — add MSW lifecycle
+import { server } from './mocks/server'
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+afterEach(() => server.resetHandlers())
+afterAll(() => server.close())
+```
+
+### Playwright E2E Setup
+
+```bash
+npm install -D @playwright/test
+npx playwright install
+```
+
+```typescript
+// playwright.config.ts
+import { defineConfig, devices } from '@playwright/test'
+
+export default defineConfig({
+  testDir: './e2e',
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  reporter: process.env.CI ? 'github' : 'html',
+  use: {
+    baseURL: 'http://localhost:3000',
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+  },
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'mobile', use: { ...devices['iPhone 14'] } },
+  ],
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI,
+  },
+})
+```
+
+### E2E Test: Critical User Flow
+
+```typescript
+// e2e/auth-flow.spec.ts
+import { test, expect } from '@playwright/test'
+
+test.describe('Authentication Flow', () => {
+  test('user can sign up, log in, and access dashboard', async ({ page }) => {
+    // Sign up
+    await page.goto('/signup')
+    await page.getByLabel('Email').fill('test@example.com')
+    await page.getByLabel('Password').fill('securepass123')
+    await page.getByRole('button', { name: /create account/i }).click()
+
+    // Should redirect to dashboard
+    await expect(page).toHaveURL(/dashboard/)
+    await expect(page.getByRole('heading', { name: /dashboard/i })).toBeVisible()
+  })
+
+  test('unauthenticated user is redirected to login', async ({ page }) => {
+    await page.goto('/dashboard')
+    await expect(page).toHaveURL(/login/)
+  })
+})
+```
+
+### package.json Scripts
+
+```json
+{
+  "scripts": {
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
+  }
+}
+```
+
+---
+
+## Accessibility Code Patterns
+
+Concrete code snippets for WCAG 2.1 AA compliance. Supplements the Non-Negotiable Rules (rules 11-15, 36-38) with copy-paste patterns.
+
+### Skip Navigation Link
+
+```typescript
+// src/components/layout/skip-link.tsx
+export function SkipLink() {
+  return (
+    <a
+      href="#main-content"
+      className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-slate-900 focus:px-4 focus:py-2 focus:text-white focus:outline-none"
+    >
+      Skip to main content
+    </a>
+  )
+}
+
+// Usage in root layout:
+// <body>
+//   <SkipLink />
+//   <Navbar />
+//   <main id="main-content" tabIndex={-1}> ... </main>
+// </body>
+```
+
+### Form Accessibility Pattern
+
+```typescript
+// Correct: every input has a label, error is linked via aria-describedby
+<FormField control={form.control} name="email" render={({ field }) => (
+  <FormItem>
+    <FormLabel htmlFor="email">Email address</FormLabel>
+    <FormControl>
+      <Input
+        {...field}
+        id="email"
+        type="email"
+        autoComplete="email"
+        aria-invalid={!!form.formState.errors.email}
+        aria-describedby={form.formState.errors.email ? 'email-error' : undefined}
+      />
+    </FormControl>
+    <FormMessage id="email-error" role="alert" />
+  </FormItem>
+)} />
+```
+
+### Focus Trap for Modals
+
+```typescript
+// shadcn/ui Dialog already handles focus trap via Radix.
+// For custom modals, use this pattern:
+'use client'
+import { useEffect, useRef } from 'react'
+
+export function useFocusTrap(isOpen: boolean) {
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!isOpen || !containerRef.current) return
+
+    const container = containerRef.current
+    const focusable = container.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+    const first = focusable[0]
+    const last = focusable[focusable.length - 1]
+
+    first?.focus()
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key !== 'Tab') return
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last?.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first?.focus()
+      }
+    }
+
+    container.addEventListener('keydown', handleKeyDown)
+    return () => container.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen])
+
+  return containerRef
+}
+```
+
+### Keyboard-Accessible Custom Component
+
+```typescript
+// Example: custom card that acts as a selectable item
+interface SelectableCardProps {
+  selected: boolean
+  onSelect: () => void
+  children: React.ReactNode
+}
+
+export function SelectableCard({ selected, onSelect, children }: SelectableCardProps) {
+  return (
+    <button
+      type="button"
+      role="option"
+      aria-selected={selected}
+      onClick={onSelect}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onSelect()
+        }
+      }}
+      className={cn(
+        'w-full rounded-lg border p-4 text-left transition-colors',
+        'focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2',
+        selected ? 'border-slate-900 bg-slate-50' : 'border-slate-200 hover:border-slate-400'
+      )}
+    >
+      {children}
+    </button>
+  )
+}
+```
+
+### Live Region for Dynamic Updates
+
+```typescript
+// Announce status changes to screen readers
+export function StatusAnnouncer({ message }: { message: string }) {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      className="sr-only"
+    >
+      {message}
+    </div>
+  )
+}
+
+// Usage: <StatusAnnouncer message={`${items.length} items loaded`} />
+```
+
+### Color Contrast Quick Reference
+
+```
+✅ Pass WCAG AA (4.5:1 for normal text, 3:1 for large text):
+  - slate-900 on white     → 15.4:1
+  - slate-700 on white     → 8.6:1
+  - slate-600 on white     → 5.7:1
+  - slate-500 on white     → 4.6:1 (borderline — use for large text only)
+  - white on slate-900     → 15.4:1
+
+❌ Fail WCAG AA:
+  - slate-400 on white     → 3.1:1 (use only for decorative/placeholder text)
+  - slate-300 on white     → 1.9:1 (borders only, never text)
+```
 
 ---
 

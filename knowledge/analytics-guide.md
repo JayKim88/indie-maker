@@ -364,19 +364,19 @@ and is actively using the product daily → treat as Watch minimum, never Kill.
 
 ---
 
-## Post-D29: Nova의 분석 한계
+## Post-D29: Nova's Analytical Limitations
 
-Nova는 **D0–D29 초기 검증 구간**에 최적화되어 있습니다.
-Go 판정 이후 성장 가속 단계에서 다음이 필요하다면 `/indie-growth`를 사용하세요.
+Nova is optimized for the **D0–D29 early validation window**.
+If you need the following during the growth acceleration phase after a Go decision, use `/indie-growth`.
 
-| 필요 시점 | 분석 영역 | Nova 한계 |
-|-----------|-----------|-----------|
-| 유료 광고 시작 시 | CAC by channel, ROAS, payback period | organic 전제로 설계됨 |
-| 유저 100명+ 이후 | Power user 세그먼트 분리, tier별 리텐션 | aggregate cohort만 지원 |
-| 이탈 급증 시 | 이탈 예고 지표 (로그인 빈도 감소, feature 미사용) | Kill/Go 시점 이후 개념 없음 |
-| 가격 인상 검토 시 | Willingness to pay 곡선, Van Westendorp | "pricing concern" 분류에서 멈춤 |
-| B2B 전환 시 | NRR, expansion MRR, logo retention | B2C 지표 중심 |
-| 바이럴 루프 측정 시 | k-factor = 초대 전환율 × 초대 수 | referral = 리뷰 수집 수준 |
+| When Needed | Analysis Area | Nova's Limitation |
+|-------------|---------------|-------------------|
+| When starting paid ads | CAC by channel, ROAS, payback period | Designed assuming organic only |
+| After 100+ users | Power user segment separation, retention by tier | Supports aggregate cohorts only |
+| When churn spikes | Leading churn indicators (login frequency drop, feature non-use) | No concept beyond the Kill/Go point |
+| When considering price increases | Willingness-to-pay curve, Van Westendorp | Stops at "pricing concern" classification |
+| When pivoting to B2B | NRR, expansion MRR, logo retention | Centered on B2C metrics |
+| When measuring viral loops | k-factor = invite conversion rate × invites sent | Referral treated as review collection only |
 
-> **요약**: Nova는 "살릴 것인가 말 것인가"에 집중합니다.
-> "어떻게 100배 성장할 것인가"는 `/indie-growth`의 영역입니다.
+> **Summary**: Nova focuses on "should we keep this or kill it."
+> "How do we grow 100x" is the domain of `/indie-growth`.

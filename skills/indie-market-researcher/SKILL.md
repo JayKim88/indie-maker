@@ -47,6 +47,25 @@ Output files are automatically read by `indie-planner` to skip redundant questio
 
 ---
 
+## Domain Anchors
+
+These keywords activate domain expertise as concrete generation rules — not just knowledge references.
+
+- **Positioning Canvas** (April Dunford, Obviously Awesome)
+  → Fill in this order: competitive alternatives → unique attributes → value of those attributes → target segment → market category. Reverse order is not allowed.
+- **Demand Signal Scoring**
+  → Search volume (Google Trends) + community complaints (Reddit/X) + existing solution review ratings → visualize as a 3-axis matrix
+- **TAM/SAM/SOM Grounding**
+  → TAM is reference only. SOM = calculated based on "number of users I can realistically reach by D29"
+- **Blue Ocean Strategy** (Kim & Mauborgne)
+  → Present a Strategy Canvas during competitive analysis: X-axis = competitive factors, Y-axis = investment level. Visualize differentiation points.
+- **Strategic Framing Rule**
+  → Every research output must answer the "So what?" question — explicitly state "What product decision does this data change?" No data dumps without insight.
+- **AI-Critical Synthesis**
+  → When using AI for qualitative data coding or theme generation, cross-verify ≥20% of raw interview/review data directly. Never output AI-generated insights without validation.
+
+---
+
 ## Trigger Phrases
 
 **Korean:**
@@ -182,42 +201,59 @@ Skips the full discovery pipeline. Runs targeted demand analysis for a specific 
 ```pseudocode
 idea = idea_description  // from mode detection step
 
-// ── 1. Search Volume & Community Demand ──────────────
-run_agent(
-  task="Analyze real demand signals for: {idea}
+// ── Launch 3 validation agents IN PARALLEL (single message, 3 Agent tool calls) ──
+// All 3 agents are independent — no data dependencies between them.
+
+Agent(
+  subagent_type="general-purpose",
+  description="Validate demand signals",
+  prompt="""Analyze real demand signals for: {idea}
+
   Check:
   - Google Trends: is search volume growing or declining? (3yr view)
   - Reddit/HN/IH: are people complaining about this problem? (recent posts)
   - Twitter/X: are people asking for this?
   - ProductHunt: any existing products in this category? reception?
-  Output demand score 1-10 with evidence.",
-  model="sonnet"
+
+  Use WebSearch for each source. Cite specific URLs and post dates.
+  Output demand score 1-10 with evidence summary.
+  Return your findings as structured text — do NOT save files."""
 )
 
-// ── 2. Willingness to Pay ─────────────────────────────
-run_agent(
-  task="Check willingness to pay signals for: {idea}
+Agent(
+  subagent_type="general-purpose",
+  description="Check willingness to pay",
+  prompt="""Check willingness to pay signals for: {idea}
+
   Check:
   - Are people paying for alternatives? (name products + pricing)
   - Are there complaints about existing pricing (too expensive / no good option)?
   - What's the typical ARPU range in this category?
-  Output WTP score 1-10 with evidence.",
-  model="sonnet"
+
+  Use WebSearch to find competitor pricing pages and review sites.
+  Output WTP score 1-10 with evidence summary.
+  Return your findings as structured text — do NOT save files."""
 )
 
-// ── 3. Distribution Channel Fit ───────────────────────
-run_agent(
-  task="Identify where target users for {idea} actually spend time.
+Agent(
+  subagent_type="general-purpose",
+  description="Map distribution channels",
+  prompt="""Identify where target users for {idea} actually spend time.
+
   Map to acquisition channels: SEO / Reddit / Twitter / ProductHunt / cold email / LinkedIn
   Which channel has the lowest CAC for this audience?
-  Output channel fit score per channel.",
-  model="sonnet"
+
+  Use WebSearch to find where this audience congregates.
+  Output channel fit score (1-10) per channel with rationale.
+  Return your findings as structured text — do NOT save files."""
 )
 
+// Wait for all 3 agents to complete, then synthesize results below.
+
 // ── Compile + Display ─────────────────────────────────
-demand_score     = aggregate(search_volume, community_demand)
-wtp_score        = willingness_to_pay_result
-channel_fit      = best_channel_result
+demand_score     = aggregate(search_volume, community_demand)  // from Agent 1
+wtp_score        = willingness_to_pay_result                   // from Agent 2
+channel_fit      = best_channel_result                         // from Agent 3
 
 verdict = (
   "🟢 Validated"  if demand_score >= 7 AND wtp_score >= 6
@@ -876,13 +912,13 @@ After saving deliverables:
 
 1. Read `.indie-maker` file in the **current directory** to get the project name.
    - If the file doesn't exist, skip MCP calls and inform the user:
-     > "웹 앱 동기화를 사용하려면 프로젝트 루트에 `.indie-maker` 파일을 만들고 웹 앱 프로젝트 이름을 한 줄로 입력하세요."
+     > "To use web app sync, create a `.indie-maker` file in the project root and enter the web app project name on a single line."
 
 2. Call MCP tools using the project name as `project_id`:
 
 ```
 im_complete_task(project_id=<name>, task_key="market-research")
-im_upload_document(project_id=<name>, type="research", content=<research 요약 전체 내용>)
+im_upload_document(project_id=<name>, type="research", content=<full research summary content>)
 ```
 
 Only call MCP tools if the `indie-maker` MCP server is connected (tools `im_*` are available).
