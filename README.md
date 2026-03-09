@@ -1,7 +1,7 @@
 # Indie Maker
 
 > AI-powered sprint system for indie makers — from idea to Kill/Go in 29 days.
-> Powered by 12 specialized Claude Code skills covering every phase of the indie sprint.
+> Powered by 14 specialized Claude Code skills covering every phase of the indie sprint.
 
 ---
 
@@ -21,7 +21,7 @@ A Claude Code skill system that automates the cognitive work of each sprint phas
 flowchart TD
     subgraph row1[" "]
         direction LR
-        A["Phase -1<br/>Market Research<br/>(optional)"] --> B["Phase 0+1<br/>Idea + Planning<br/>D1"] --> C["Phase 1.5<br/>UX Sprint<br/>D1 PM"] --> D["Phase 2<br/>Design<br/>D2"] --> E["Monetize<br/>Pricing<br/>D2–D3"]
+        A["Phase -1<br/>Market Research<br/>(optional)"] --> B["Phase 0+1<br/>Idea + Planning<br/>D1"] --> C["Phase 1.5<br/>UX Sprint<br/>D1 PM"] --> D["Phase 2<br/>Design<br/>D2"] --> E["Monetize<br/>Pricing<br/>D2–D3"] --> E2["Architecture<br/>Blueprint<br/>D3"]
     end
     subgraph row2[" "]
         direction RL
@@ -34,7 +34,7 @@ flowchart TD
         J -->|Kill| L["Phase 9<br/>Retro<br/>D29"]
     end
 
-    E --> F
+    E2 --> F
     H --> I
 
     style A fill:#f5f5f5,stroke:#999
@@ -79,6 +79,7 @@ flowchart TD
     DB["design-brief.md"]
     LC["landing-copy.md"]
     PS["pricing-strategy.md"]
+    AR["architecture.md"]
     MVP["Working MVP<br/>(live URL)"]
     LP["launch-plan.md<br/>bip-posts.md<br/>launch-metrics.md"]
     LIVE["Live Product"]
@@ -92,9 +93,10 @@ flowchart TD
     UX --> DB
     DB --> LC
     PL --> PS
-    WF --> MVP
-    LC --> MVP
-    PS --> MVP
+    WF --> AR
+    LC --> AR
+    PS --> AR
+    AR --> MVP
     MVP --> LP
     LP --> LIVE
     LIVE --> KG
@@ -120,13 +122,14 @@ flowchart TD
 | 3   | `/indie-ux`                | Kai   | 1.5    | D1 afternoon              | `docs/indie-ux/`                      |
 | 4   | `/indie-designer`          | Vera  | 2      | D2                        | `docs/indie-designer/`                |
 | 5   | `/indie-monetize`          | Finn  | 2–3 + 7 | D2–D3 (before Stripe code), D21+ (post-launch tune) | `docs/indie-monetize/` |
-| 6   | `/indie-frontend`          | Rex   | 3–5    | D3–D6 continuous          | — (interactive guide)                 |
-| 7   | `/indie-backend`           | Axel  | 3–5    | D3–D6 continuous          | — (interactive guide)                 |
-| 8   | `/indie-infra`             | Sam   | 3–5+6  | D6 QA + deploy            | — (guide + QA checklist)              |
-| 9   | `/launch-kit`              | —     | 5      | D7, before indie-launcher | `launch-kit-output.md`                |
-| 10  | `/indie-launcher`          | Leo   | 5      | D7–D13                    | `docs/indie-launcher/`                |
-| 11  | `/indie-analyst`           | Nova  | 7+Gate | D21–D29                   | `docs/indie-analyst/`                 |
-| 12  | `/indie-growth`            | Gio   | 8+ Go  | D30+                      | `docs/indie-growth/`                  |
+| 6   | `/indie-architect`         | Arch  | 2.5–3  | D3 morning (before build)  | `docs/indie-architect/`               |
+| 7   | `/indie-frontend`          | Rex   | 3–5    | D3–D6 continuous          | — (interactive guide)                 |
+| 8   | `/indie-backend`           | Axel  | 3–5    | D3–D6 continuous          | — (interactive guide)                 |
+| 9   | `/indie-infra`             | Sam   | 3–5+6  | D6 QA + deploy            | — (guide + QA checklist)              |
+| 10  | `/indie-copy`              | Cal   | 5      | D7, before indie-launcher | `docs/indie-copy/`                    |
+| 11  | `/indie-launcher`          | Leo   | 5      | D7–D13                    | `docs/indie-launcher/`                |
+| 12  | `/indie-analyst`           | Nova  | 7+Gate | D21–D29                   | `docs/indie-analyst/`                 |
+| 13  | `/indie-growth`            | Gio   | 8+ Go  | D30+                      | `docs/indie-growth/`                  |
 | —   | `/indie-retro`             | Sage  | 9 Kill | D29 Kill verdict          | `docs/indie-retro/`                   |
 
 ---
@@ -232,7 +235,9 @@ gantt
 /indie-ux           # UX + wireframes
 /indie-designer     # Brand + landing copy
 /indie-monetize     # Pricing strategy + first paying customer
+/indie-architect    # Architecture blueprint (run before build)
 /indie-backend      # Supabase + Stripe + API questions
+/indie-copy         # CRO copywriting (landing, channel posts, email drip)
 /indie-launcher     # PH + Reddit + HN + Discord launch system
 /indie-analyst      # Kill/Go analysis (run D21–D29)
 ```

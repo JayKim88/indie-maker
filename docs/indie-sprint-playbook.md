@@ -35,14 +35,14 @@
 ## 전체 스프린트 맵
 
 ```
-[Phase -1]   [Phase 0+1]  [Phase 1.5]  [Phase 2]   [Phase 2.5]  [Phase 3-5]     [Phase 5]       [Phase 6]  [Phase 7]    [Gate]     [Phase 8+]  [Phase 9]
- Market     →  Idea +    → UX Sprint → Design   → Monetize   → Build +       → Launch        → Launch  → Post      → Kill/Go → Growth  → Retro
- Research      Planning               Sprint     Pricing      Deploy Sprint     Prep Sprint      Day       Launch
- D-1 (opt)     D1 (1일)   D1 오후     D2 (1일)   D2-D3        D3-D6 (4일)     D7-D13 (7일)     D14       D15-D28      D29        D30+        D29(Kill)
+[Phase -1]   [Phase 0+1]  [Phase 1.5]  [Phase 2]   [Phase 2.5]  [Phase 2.5-3]  [Phase 3-5]     [Phase 5]       [Phase 6]  [Phase 7]    [Gate]     [Phase 8+]  [Phase 9]
+ Market     →  Idea +    → UX Sprint → Design   → Monetize   → Architecture → Build +       → Launch        → Launch  → Post      → Kill/Go → Growth  → Retro
+ Research      Planning               Sprint     Pricing      Blueprint      Deploy Sprint     Prep Sprint      Day       Launch
+ D-1 (opt)     D1 (1일)   D1 오후     D2 (1일)   D2-D3        D3 (30분)      D3-D6 (4일)     D7-D13 (7일)     D14       D15-D28      D29        D30+        D29(Kill)
                ◀─────────────── Claude Code 가속 (6일) ─────────────────────────▶  ◀── 커뮤니티/시간 의존 (23일) ──▶  ◀─Go─▶  ◀─Kill─▶
 ```
 
-**산출물 흐름**: idea-canvas → prd-lean → **ux-flow + wireframes** → design-brief → working MVP → live product → traction data → Kill/Go → **growth-experiments / retrospective**
+**산출물 흐름**: idea-canvas → prd-lean → **ux-flow + wireframes** → design-brief → pricing-strategy → **architecture.md** → working MVP → live product → traction data → Kill/Go → **growth-experiments / retrospective**
 
 **가속 근거**:
 | 작업 | 기존 소요시간 | Claude Code 후 | 이유 |
@@ -224,12 +224,59 @@ Finn(indie-monetize)이 결정하는 것:
 
 ---
 
+## Architecture Sprint (D3 오전, 30분)
+
+**목표**: 빌드 시작 전 Rex(프론트)/Axel(백엔드)/Sam(인프라)이 공유할 기술 청사진 1페이지 생성.
+
+> 왜 필요한가: 아키텍처 없이 빌드를 시작하면 세 에이전트가 각자 파일 구조, API 설계, 타입 정의를 결정합니다.
+> 이로 인해 프론트엔드가 호출하는 API와 백엔드가 만든 API가 안 맞거나, 타입이 중복 정의되는 문제가 발생합니다.
+
+```bash
+# D3 빌드 시작 전 (30분)
+/indie-architect
+# → docs/indie-architect/architecture.md 생성
+#   - 파일 구조 (src/ 트리)
+#   - DB 스키마 초안 (테이블 + 관계)
+#   - API 엔드포인트 목록
+#   - 공유 TypeScript 타입
+#   - 환경변수 목록 (.env.example)
+#   - 기술 리스크 1-2개
+```
+
+Arch가 결정하는 것:
+- 프론트+백+인프라 전체를 아우르는 파일 구조
+- PRD 엔티티 → DB 테이블 초안 매핑
+- UX 플로우 화면 → API 엔드포인트 매핑
+- 공유 타입 정의 (Rex와 Axel이 같은 타입 사용)
+- 환경변수 전체 목록 (Sam이 배포 시 사용)
+
+Arch가 결정하지 않는 것:
+- RLS 정책 상세 → Axel이 빌드 중 설계
+- 컴포넌트 구현 → Rex가 빌드 중 구현
+- 배포 설정 → Sam이 D6에 처리
+
+### 산출물 (D3 오전)
+
+| 파일 | 생성 방식 |
+|------|---------|
+| `architecture.md` | `/indie-architect` 자동 생성 → 검토 |
+
+### 코드 모듈러리티 규칙 (architecture.md에 포함)
+
+빌드 중 Rex/Axel/Sam이 따르는 코드 구조 규칙:
+- **파일당 200 LOC 제한** — 초과 시 분리 (프롬프트/설정 파일 제외)
+- **catch-all 파일 금지** — `utils.ts`, `helpers.ts` 대신 기능별 파일 (`format-date.ts`, `calculate-price.ts`)
+- **파일 하나 = 책임 하나** — 한 문장으로 설명 불가하면 분리
+- **기능별 코로케이션** — `components/features/{feature}/`에 관련 컴포넌트/훅/액션 함께 배치
+
+---
+
 ## Phase 3+4: Build + Deploy Sprint (D3-D6, 4일)
 
 **목표**: 핵심 플로우 1개 동작 + 프로덕션 배포까지. Claude Code로 4일 완료.
 
 ### Claude Code 활용 원칙
-- **세션 시작 시**: idea-canvas.md + prd-lean.md + tech-stack.md를 항상 컨텍스트로 제공
+- **세션 시작 시**: idea-canvas.md + prd-lean.md + architecture.md + tech-stack.md를 항상 컨텍스트로 제공
 - **막히면 즉시**: 에러 메시지 + 현재 코드 전체를 Claude에 붙여넣고 질문
 - **기능 크리프 차단**: 새 아이디어 → `backlog.md`에 기록, 즉시 구현 금지
 - **완료 기준**: 유저가 가치를 경험하고 돈을 낼 수 있으면 충분
@@ -359,12 +406,12 @@ RESEND_API_KEY=
 # Phase 5 전체 런치 전략 (PH 패키지 + BIP 캘린더 + 베타 모집 + D14 플레이북)
 /indie-launcher
 
-# 마케팅 카피만 필요한 경우 (랜딩, IH, Reddit, 이메일)
-/launch-kit
+# CRO 카피만 필요한 경우 (랜딩, 채널 포스트, 이메일 드립)
+/indie-copy
 ```
 
-**차이점**: `indie-launcher` = 런치 전략 + 실행 플랜 | `launch-kit` = 마케팅 카피 생성
-두 스킬은 독립적이지만 함께 쓰면 시너지: launch-kit 먼저 → indie-launcher가 카피 재활용
+**차이점**: `indie-launcher` = 런치 전략 + 실행 플랜 (어디에 뿌릴지) | `indie-copy` = CRO 전환 카피 (뭘 쓸지)
+두 스킬은 독립적이지만 함께 쓰면 시너지: indie-copy 먼저 → indie-launcher가 카피 재활용
 
 ---
 
@@ -519,7 +566,7 @@ MRR 마일스톤: $100 → $500 → $1,000
 | Phase 2-3 | `/indie-monetize` | 가격 전략 + 페이월 설계 + 첫 유료 고객 플레이북 | 2-3시간 |
 | Phase 3-5 빌드 | `/indie-frontend` `/indie-backend` `/indie-infra` | 개발 가이드 | 지속적 |
 | Phase 5 런치 준비 | `/indie-launcher` | PH + Reddit + HN + Discord 전략 + BIP 캘린더 | 4-6시간 |
-| Phase 5 카피 | `/launch-kit` | 마케팅 카피 생성 (indie-launcher와 병행) | 2-3시간 |
+| Phase 5 카피 | `/indie-copy` | CRO 전환 카피 생성 (indie-launcher와 병행) | 2-3시간 |
 | Phase 7 분석 | `/indie-analyst` | Kill/Go 판단 + AARRR 분석 | 2-3시간 |
 | Phase 7+ | `knowledge/automate-guide.md` 참조 | 이메일 drip + 지표 자동화 (D15 이후) | 3-5시간 |
 | Phase 8+ (Go) | `/indie-growth` | 성장 실험 설계 + 채널 전략 | 3-5시간 |
