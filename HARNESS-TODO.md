@@ -12,7 +12,7 @@
 |-------|------|--------|----------|------|
 | L0 | knowledge 정리 (orphan 격리) | 1 | 완료 | **DONE 2026-05-12** |
 | L1 | Critical 버그 수정 | 3 | ~1시간 | **DONE 2026-05-12** |
-| L2 | 스프린트 상태 머신 (핵심 ROI) | 4 | ~반나절 | TODO |
+| L2 | 스프린트 상태 머신 (핵심 ROI) | 4 | ~반나절 | **3.5/4 DONE** |
 | L3 | Scope & Discipline 자동화 | 3 | ~3시간 | TODO |
 | L4 | Speculative (보류) | 2 | — | DEFER |
 
@@ -136,97 +136,132 @@ local-only/, projects/, test-sprint/, wrap-up/
 > **핵심 통찰**: indie-maker는 "프레임워크" + "6개 프로젝트의 메타 디렉토리"의 이중 구조.
 > 각 프로젝트가 독립된 sprint state를 가져야 하며, 이것이 표면화되어야 인지 부하가 감소함.
 
-### L2.1 `.indie-sprint.json` 스키마 정의
+### L2.1 `.indie-sprint.json` 스키마 정의 [DONE — 2026-05-12]
 
 **Why**
 "지금 Pulse는 Day 며칠? 다음 스킬은 뭐? Kill criteria는?"이 매 세션 재구축 비용을 발생시킴.
 
-**What**
-- [ ] `projects/{name}/.indie-sprint.json` 스키마 확정:
-
-```json
-{
-  "project": "pulse",
-  "status": "active",
-  "started_at": "2026-04-30",
-  "current_day": 12,
-  "current_phase": "launch-prep",
-  "completed_skills": [
-    { "skill": "indie-planner", "completed_at": "2026-04-30" },
-    { "skill": "indie-ux", "completed_at": "2026-05-01" }
-  ],
-  "next_recommended": ["indie-copy", "indie-launcher"],
-  "kill_criteria": {
-    "ph_votes": 50,
-    "paid_users_d29": 3,
-    "mrr_d21": 50,
-    "retention_d14_pct": 10
-  },
-  "metrics": {
-    "paid_users": 0,
-    "mrr": 0,
-    "ph_votes": null,
-    "last_updated": null
-  }
-}
-```
-
-- [ ] enum 정의:
+**Done**
+- [x] `schemas/indie-sprint.schema.json` 작성 (JSON Schema Draft-07)
+  - 필수: `project`, `status`, `started_at`
+  - 옵션: `display_name`, `stack`, `current_day` `[DERIVED]`, `current_phase` `[DERIVED]`, `completed_skills`, `next_recommended` `[DERIVED]`, `kill_criteria`, `metrics`, `launch_date`, `verdict`, `notes`
+  - `additionalProperties: false` (오타 방어)
+  - 모든 필드에 description (IDE IntelliSense 지원)
+- [x] enum 확정:
   - `status`: `active | dormant | killed | shipped`
-  - `current_phase`: `idea | planning | ux | design | architect | build | launch-prep | launch | post-launch | gate | growth | retro`
-- [ ] `schemas/indie-sprint.schema.json` (JSON Schema)로 별도 보존 — 검증용
+  - `current_phase`: 13개 phase (`idea`, `planning`, `ux`, `design`, `monetize`, `architect`, `build`, `launch-prep`, `launch`, `post-launch`, `gate`, `growth`, `retro`)
+  - `verdict`: `go | watch | kill | null`
+  - `completed_skills[].skill`: 14개 indie-* 스킬
+- [x] `schemas/example.indie-sprint.json` — 주석된 미드-스프린트 예시
+- [x] `schemas/README.md` — 사용법, IDE 통합, CLI 검증, 업데이트 절차
+- [x] ajv-cli로 example → schema 검증 통과 (`schemas/example.indie-sprint.json valid`)
 
-**Acceptance**
-샘플 파일 1개를 임의 프로젝트(예: devjob-ai)에 작성해서 사람이 읽고 즉시 상태 파악 가능
+**핵심 설계 결정**
+- **Derived vs Stored**: `current_day`, `current_phase`, `next_recommended`는 다른 필드에서 계산 가능 → `[DERIVED]` 표시. 가독성 위해 명시 저장 (hook이 동기화 유지). DRY 위반이지만 raw JSON 읽기 쉬워짐.
+- **kill_criteria/metrics 자유 형식**: `additionalProperties: { ... }` — 표준 SaaS 메트릭(ph_votes/mrr/retention) 외 비표준 메트릭도 허용
+- **stack 필드**: `indie-default` (Supabase+Next.js) vs 기타 — 비표준 스택은 `knowledge/senior-reference/`로 라우팅 (예: Pulse=nestjs → backend-principles.md)
+- **D1=1 정책**: `current_day = (today - started_at) + 1`로 D1이 시작일. D0 아님.
 
-**비용**: 1시간
+**Acceptance** [DONE]
+`schemas/example.indie-sprint.json` 1분 안에 읽고 sprint 상태 파악 가능.
 
 ---
 
-### L2.2 SessionStart hook — 상태 자동 인젝션
+### L2.1.1 프로젝트 상태 파일 작성 [DONE — 2026-05-12]
+
+**Q1 결과**: 6개 프로젝트 모두 `dormant` 분류.
+
+**Done**
+- [x] 6개 `projects/{name}/.indie-sprint.json` 생성 (모두 status=dormant)
+- [x] 파일시스템 단서로 `started_at`, `current_phase`, `completed_skills` 추정
+- [x] 6개 모두 ajv 스키마 검증 통과
+- [x] `projects/*`가 .gitignore 처리되어 sprint state는 per-machine 로컬 보관
+
+**분류 결과**
+| Project | current_phase | completed_skills | 비고 |
+|---------|--------------|------------------|------|
+| devjob-ai | planning | planner만 | 기획 후 멈춤 |
+| indie-maker-web | post-launch | [] | 메타 도구, framework 외부에서 빌드 |
+| jd-lens | design | researcher/planner/ux/designer | 4 phase 진행 후 멈춤 |
+| my-timeline | build | planner/ux/designer | 가장 진척됨, 코드 존재 |
+| pdf-annotator | idea | [] | src/만 존재 |
+| pdf-viewer | build | [] | 코드 있으나 planning skip |
+
+**기록할 만한 점**
+- 활성 프로젝트가 0개 → 당장은 SessionStart hook의 효과가 제한적 ([OPINION])
+- dormant도 후일 reactivate 시 historical context로 가치 있음
+- indie-maker-web은 sprint product가 아닌 메타 도구 → 향후 framework "system project" 라벨 필요 가능
+
+---
+
+### L2.2 SessionStart hook — 상태 자동 인젝션 [DONE — 2026-05-12]
 
 **Why**
 세션 시작 시 사용자가 "어느 프로젝트, 어느 Day"인지 다시 말하는 비용 제거.
 
-**What**
-- [ ] `.claude/settings.json`에 SessionStart hook 추가
-- [ ] hook 스크립트(`bin/inject-sprint-context.sh`):
-  1. CWD가 `projects/{name}/` 또는 그 하위인지 감지
-  2. 해당 `.indie-sprint.json` 읽기
-  3. `current_day = today - started_at`로 자동 재계산
-  4. 다음 문자열을 컨텍스트에 인젝션:
-     ```
-     [Sprint Context] project=pulse · D12/D29 · phase=launch-prep
-     완료: planner, ux, designer, architect, build
-     다음 권장: /indie-copy → /indie-launcher
-     Kill 기준: PH≥50, paid≥3, MRR≥$50 (D29)
-     ```
-- [ ] CWD가 프레임워크 루트면 "프레임워크 모드" 메시지 (스킬 작업 금지)
+**Done**
+- [x] `bin/inject-sprint-context.py` 작성 (Python3, self-contained)
+  - stdin JSON에서 cwd 파싱 (Claude Code hook protocol)
+  - CWD에서 위로 걸어 올라가며 `.indie-sprint.json` 탐색
+  - 4가지 status 포맷: active/dormant/killed/shipped
+  - active 케이스: D-day 계산 (D1=시작일), 다음 스킬 추천 (NEXT_SKILL 그래프 기반)
+  - framework root: "Framework Mode" 안내
+  - 그 외 경로: silent (컨텍스트 오염 없음)
+  - 모든 예외 catch → exit 0 (Claude Code 권장)
+- [x] `.claude/settings.json`에 SessionStart hook 등록 (matcher: "startup")
+- [x] 절대경로 사용: `python3 /Users/jaykim/Documents/Projects/indie-maker/bin/inject-sprint-context.py` (단일 머신 기준)
+- [x] 4가지 시나리오 수동 검증 완료:
+  - dormant 프로젝트 → 상태 + resume 힌트 표시
+  - framework root → framework mode 안내
+  - 외부 경로 → silent
+  - active 시뮬레이션 → D-day, 다음 스킬, Kill 기준 모두 정상 표시
 
-**Acceptance**
-`cd projects/pulse && claude` 진입 시 위 컨텍스트가 자동 표시
+**Acceptance** [DONE]
+`cd projects/<name> && claude` 진입 시 (또는 indie-maker 루트 진입 시) 자동으로 컨텍스트 표시.
+**다음 세션에서 자동 발화 확인 필요** (현 세션엔 영향 없음).
 
-**비용**: 1.5시간
+**알려진 한계 / 후속 가능**
+- 절대경로 하드코딩 → 멀티머신 배포 시 수정 필요
+- `.claude/` 가 .gitignore → hook 설정이 버전 관리 안 됨 (단일 머신은 OK)
+- stdin JSON 파싱 실패 시 sys.argv[1] fallback — 수동 디버깅용
 
 ---
 
-### L2.3 Statusline — 상태 상시 표시
+### L2.3 Statusline — 상태 상시 표시 [DONE — 2026-05-12]
 
 **Why**
 세션 중에도 Day/phase가 항상 보여야 잊지 않음.
 
-**What**
-- [ ] `~/.claude/settings.json`에 statusline 설정 추가
-- [ ] `bin/statusline.sh` 작성 — CWD에서 가장 가까운 `.indie-sprint.json` 탐색 후:
-  ```
-  [pulse D12/29 · launch-prep · MRR $0/$50]
-  ```
-- [ ] 프레임워크 루트에선 다른 표시: `[indie-maker · framework]`
+**Done**
+- [x] `bin/statusline.py` 작성 (Python3, ~95줄, 30ms 실행)
+- [x] 4가지 상태 포맷 + framework mode + silent fallback
+- [x] `.claude/settings.json`에 `statusLine` 등록 (프로젝트 레벨)
+- [x] User-level `~/.claude/settings.json`에 statusLine 없음 확인 (충돌 없음)
+- [x] 4종 시나리오 + active 시뮬레이션 통과
 
-**Acceptance**
-statusline에 위 포맷이 항상 표시됨
+**포맷 샘플**
+```
+[my-timeline · dormant @ build]          ← dormant
+[pdf-annotator · dormant @ idea]         ← dormant (이른 단계)
+[indie-maker · framework]                ← framework root
+[pulse D12/29 · build · MRR $12/$50]    ← active (kill 기준 진행률 표시)
+[pulse D14/29 · launch-prep · paid 1/3]  ← active (mrr 없으면 paid_users로)
+```
 
-**비용**: 45분
+**설계 결정** [OPINION]
+- **Python 선택**: 30ms로 충분, 의존성 없음, inject-sprint-context.py와 패턴 일관
+- **Active 시 진행률**: kill_criteria에 `mrr_d21_usd` 또는 `paid_users_d29` 있으면 metrics와 함께 ratio 표시. 그 외는 phase만.
+- **외부 경로 silent**: indie-maker 외부에선 빈 출력 → Claude 기본 statusline 표시
+- **모든 예외 swallow**: statusline은 절대 crash 안 되어야 (사용자 경험)
+
+**Acceptance** [DONE]
+다음 세션부터 자동 표시. 30ms 실행 시간으로 statusline 빈번 호출에 적합.
+
+**알려진 한계**
+- 절대경로 하드코딩 (L2.2와 동일)
+- `metrics.last_updated` 미체크 → 오래된 메트릭도 그대로 표시 (필요 시 stale 경고 추가)
+
+**비용**: 45분 (실측 ~30분)
 
 ---
 

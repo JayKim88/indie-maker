@@ -1,0 +1,35 @@
+{
+  "$schema": "./indie-sprint.schema.json",
+  "project": "example-app",
+  "display_name": "Example App",
+  "status": "active",
+  "started_at": "2026-04-30",
+  "stack": "indie-default",
+  "current_day": 13,
+  "current_phase": "launch-prep",
+  "completed_skills": [
+    { "skill": "indie-market-researcher", "completed_at": "2026-04-29" },
+    { "skill": "indie-planner",           "completed_at": "2026-04-30" },
+    { "skill": "indie-ux",                "completed_at": "2026-04-30" },
+    { "skill": "indie-designer",          "completed_at": "2026-05-01" },
+    { "skill": "indie-monetize",          "completed_at": "2026-05-02" },
+    { "skill": "indie-architect",         "completed_at": "2026-05-02" }
+  ],
+  "next_recommended": ["indie-copy", "indie-launcher"],
+  "kill_criteria": {
+    "ph_votes": 50,
+    "paid_users_d29": 3,
+    "mrr_d21_usd": 50,
+    "retention_d14_pct": 10
+  },
+  "metrics": {
+    "last_updated": null,
+    "paid_users": null,
+    "mrr_usd": null,
+    "ph_votes": null,
+    "retention_d14_pct": null
+  },
+  "launch_date": null,
+  "verdict": null,
+  "notes": "Pre-launch. Build wraps D6; waiting for copy + launcher before scheduling D14."
+}

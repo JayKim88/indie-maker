@@ -1,0 +1,137 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Indie Sprint State",
+  "description": "Per-project sprint state for indie-maker. Lives at `projects/{name}/.indie-sprint.json`. Read by SessionStart hook, updated by PostToolUse hook on skill output writes. Hand-editable as fallback.",
+  "type": "object",
+  "required": ["project", "status", "started_at"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional. Path or URL to this schema for IDE/CLI validation."
+    },
+    "project": {
+      "type": "string",
+      "description": "Machine-readable project slug. Must match the folder name under projects/.",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Optional human-readable name. Defaults to `project` if omitted."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "dormant", "killed", "shipped"],
+      "description": "Lifecycle. active=working on it. dormant=paused. killed=D29 Kill verdict, retro done. shipped=Go verdict, in growth phase."
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date",
+      "description": "Sprint D1 date (YYYY-MM-DD). current_day = (today - started_at) + 1 — D1 is the start day, not D0."
+    },
+    "stack": {
+      "type": "string",
+      "description": "Tech stack identifier. `indie-default` = Supabase + Next.js + Tailwind + shadcn/ui. Other values (e.g., 'nestjs', 'fastapi') route to knowledge/senior-reference/ guides.",
+      "default": "indie-default"
+    },
+    "current_day": {
+      "type": "integer",
+      "description": "[DERIVED] Days elapsed since started_at, where D1 is the start. Auto-recomputed by SessionStart hook. Stored for readability when inspecting the file.",
+      "minimum": 1
+    },
+    "current_phase": {
+      "type": "string",
+      "enum": [
+        "idea",
+        "planning",
+        "ux",
+        "design",
+        "monetize",
+        "architect",
+        "build",
+        "launch-prep",
+        "launch",
+        "post-launch",
+        "gate",
+        "growth",
+        "retro"
+      ],
+      "description": "[DERIVED] Sprint phase. Computed from the last completed_skill via skill→phase mapping."
+    },
+    "completed_skills": {
+      "type": "array",
+      "description": "Skills completed in chronological order. Appended by PostToolUse hook when a skill writes its output file(s).",
+      "items": {
+        "type": "object",
+        "required": ["skill", "completed_at"],
+        "additionalProperties": false,
+        "properties": {
+          "skill": {
+            "type": "string",
+            "enum": [
+              "indie-market-researcher",
+              "indie-planner",
+              "indie-ux",
+              "indie-designer",
+              "indie-monetize",
+              "indie-architect",
+              "indie-frontend",
+              "indie-backend",
+              "indie-infra",
+              "indie-copy",
+              "indie-launcher",
+              "indie-analyst",
+              "indie-growth",
+              "indie-retro"
+            ]
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      }
+    },
+    "next_recommended": {
+      "type": "array",
+      "description": "[DERIVED] Next skill(s) to run, computed from the skill dependency graph (lib/skill-dependency-graph.json — L2.4).",
+      "items": {
+        "type": "string",
+        "pattern": "^indie-[a-z-]+$"
+      }
+    },
+    "kill_criteria": {
+      "type": "object",
+      "description": "D29 Kill/Go thresholds set during planning (indie-planner output). Metric names are free-form but should match keys in `metrics`. Standard SaaS examples: ph_votes, paid_users_d29, mrr_d21_usd, retention_d14_pct.",
+      "additionalProperties": {
+        "type": ["number", "string", "boolean"]
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "description": "Live metric snapshot. Hand-edited or auto-updated by indie-analyst. Compared against kill_criteria at D29 gate. Use `null` for not-yet-measured.",
+      "additionalProperties": true,
+      "properties": {
+        "last_updated": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "ISO timestamp of last metrics update. null until first measurement."
+        }
+      }
+    },
+    "launch_date": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "D14 launch date once it occurs."
+    },
+    "verdict": {
+      "type": ["string", "null"],
+      "enum": ["go", "watch", "kill", null],
+      "description": "D29 Kill/Go verdict set by indie-analyst. null pre-gate."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Free-form notes — pivots, blockers, anything that doesn't fit elsewhere."
+    }
+  }
+}
