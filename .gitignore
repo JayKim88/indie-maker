@@ -2,3 +2,4 @@ local-only
 project-ideas
 projects/*
 .claude/
+.DS_Store
