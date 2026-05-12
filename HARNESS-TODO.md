@@ -15,6 +15,7 @@
 | L2 | 스프린트 상태 머신 (핵심 ROI) | 4 | ~반나절 | **3.5/4 DONE** |
 | L3 | Scope & Discipline 자동화 | 3 | ~3시간 | TODO |
 | L4 | Speculative (보류) | 2 | — | DEFER |
+| L5 | Self-Correcting & Behavior Harness + OS Readiness | 7 | ~10.5h | **1/7 DONE** (plan: `~/.claude/plans/bubbly-toasting-raccoon.md`) |
 
 ---
 
@@ -395,8 +396,53 @@ L3.3 (다이어트) ← 독립, 언제든 가능
 
 ---
 
+## Layer 5 — Self-Correcting & Behavior Harness + OS Readiness [신설 2026-05-12]
+
+> **베이스**: OpenAI "Harness engineering" (2026-02) 프레임워크 → `Agent = Model + Harness`, Feedforward×Feedback × Computational×Inferential 4분면.
+> **전체 계획**: `/Users/jaykim/.claude/plans/bubbly-toasting-raccoon.md`
+> **목적**: indie-maker는 강한 Feedforward Inferential 외엔 발달 미흡 — 자가-수정 메커니즘과 drift 감지를 갖춰 "잘 가르치는 하네스" → "잘 가르치고 검증하는 하네스"로 진화. 동시에 오픈소스 공개 준비.
+
+### L5.0 Portability Foundation [DONE — 2026-05-12]
+
+**Done**
+- [x] `.claude/settings.template.json` — harness 전용 템플릿 (placeholder `__INDIE_MAKER_ROOT__`)
+- [x] `bin/install-harness.sh` — 멱등 설치 스크립트 (sync-skills + settings.json 머지)
+  - 기존 permissions/additionalDirectories 보존, hooks와 statusLine만 갱신
+  - 다른 CWD에서 호출해도 자기-위치 탐지 정상 작동 (`/tmp`에서 검증)
+- [x] `.gitignore` 정교화: `.claude/*` 무시 + `!.claude/settings.template.json` 트래킹
+- [x] `INSTALL.md` — clone → install → first sprint 가이드 + verification 5단계 + troubleshooting
+- [x] roundtrip 검증: 기존 settings.json 보존 (한글 포함, ensure_ascii=False)
+
+### L5.1 Lint-as-Prompt Pattern (with L3.2) [고우선, ~2h]
+OpenAI 핵심 패턴 — 검증 실패 메시지에 자가-수정 명령 포함. L3.2 PostToolUse를 이 포맷으로. 우선순위 3 SKILL.md Quality Gate에 "→ If no: ..." 추가 (indie-planner, indie-ux, indie-infra). `knowledge/harness-patterns.md` 신규.
+
+### L5.2 Framework Fitness Functions [중우선, ~1.5h]
+`bin/fitness-check.py` — SKILL.md/knowledge guide/`.indie-sprint.json` 일관성 검증. pre-commit hook + GitHub Actions workflow.
+
+### L5.3 Approved Fixtures — Behavior Regression [중우선, ~2h]
+우선 3 skill에 fixture (planner/analyst/retro). `bin/run-fixtures.sh`. 기존 `test-sprint/gitMessage_2026-03-06/` 구조 통일.
+
+### L5.4 Garbage Collection — Drift Detection [중우선, ~1.5h]
+`bin/garbage-collect.py` (또는 `/indie-gc` skill) — stale dormant, stalled active, schema drift, orphan outputs 감지. 자가-수정 명령 포함 출력.
+
+### L5.5 Cycle-Learning Constraint Injection [저우선, ~1h]
+`lessons.md`에 Machine-Readable Constraints YAML 섹션 신설. indie-planner가 이를 Q5 단계의 mechanical 검증으로 변환.
+
+### L5.6 Open-Source Packaging [후기, ~2h]
+INSTALL.md, CONTRIBUTING.md, LICENSE, `examples/sample-sprint/`, README.md 갱신.
+
+### L5.7 CI Workflow [후기, ~1h]
+`.github/workflows/{fitness,schema-validate,fixtures}.yml`.
+
+**의존성 순서**: L5.0 → (L5.1, L5.2, L5.5 병렬) → L5.3 → L5.4 → L5.6 → L5.7
+
+---
+
 ## 참조
 
 - 분석 대화 (이번 세션)
 - `CLAUDE.md` — 현재 스코프 규칙
 - `README.md` — 사용자 진입 흐름
+- `~/.claude/plans/bubbly-toasting-raccoon.md` — L5 상세 계획 (재사용 자산, 검증 매트릭스 포함)
+- [OpenAI Harness Engineering](https://openai.com/index/harness-engineering/) — 출발점 글
+- [Martin Fowler: Harness Engineering for Coding Agent Users](https://martinfowler.com/articles/harness-engineering.html) — 4분면 + 3 regulation areas 구조화

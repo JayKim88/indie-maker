@@ -1,0 +1,20 @@
+{
+  "_comment": "Template for project-level Claude Code settings. Run `bash bin/install-harness.sh` to generate .claude/settings.json with absolute paths resolved. The installer is idempotent — re-run after pulling updates.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 __INDIE_MAKER_ROOT__/bin/inject-sprint-context.py"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "python3 __INDIE_MAKER_ROOT__/bin/statusline.py"
+  }
+}

@@ -1,5 +1,8 @@
 local-only
 project-ideas
 projects/*
-.claude/
 .DS_Store
+
+# .claude/ — ignore user-local config but track the harness template
+.claude/*
+!.claude/settings.template.json
