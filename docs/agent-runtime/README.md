@@ -96,7 +96,7 @@
 
 - **Q1 — portfolio DB = ?** → ✅ **SQLite 단일 파일 + PostToolUse 동기화 hook** (결정: 2026-05-13)
   - 위치: `portfolio.db` (repo root, `.gitignore` 대상)
-  - 동기화: `.indie-sprint.json` 변경 시 → SQLite mirror (HARNESS-TODO L2.4 확장)
+  - 동기화: `.indie-sprint.json` 변경 시 → SQLite mirror ([`ROADMAP.md`](../../ROADMAP.md) T1.L2.4 확장)
   - 마이그레이션: 초기 seed는 기존 6개 `.indie-sprint.json` 에서 1회 일괄 import
   - 결정 근거: 정당화 use case = *"내가 항상 어느 Phase에서 막히는가?"* + 자유 SQL 자유도 보존
   - 대안 기각: Supabase (network 의존 + 개인용 과잉), JSON glob (use case #2-4의 SQL 자유도 안 됨)
@@ -119,7 +119,7 @@
 |---|------|------|
 | 14 skills | `skills/indie-*/SKILL.md` | Agent Runtime은 **이 위에 얹는 layer**. 기존 skill 동작 변경 없음. |
 | `.indie-sprint.json` | `projects/*/.indie-sprint.json` | indie-mcp의 `get_sprint_state()` 가 읽는 주된 소스. |
-| HARNESS-TODO L2.4 (PostToolUse hook) | `HARNESS-TODO.md` | portfolio DB 하이브리드 채택 시 이 항목 확장. |
+| ROADMAP T1.L2.4 (PostToolUse hook) | [`ROADMAP.md`](../../ROADMAP.md) | portfolio DB 하이브리드 채택 시 이 항목 확장. |
 | `bin/inject-sprint-context.py` | `bin/` | SessionStart에서 컨텍스트 주입. Mission Control 도 같은 방식 재사용 가능. |
 | 지식 가이드 (frontend/backend/infra 등) | `knowledge/*.md` | sub-agent의 system prompt에 selective inject. |
 

@@ -94,7 +94,7 @@ In the Claude Code session:
 
 See [README.md](README.md) for the full sprint map.
 
-After running indie-planner once, manually create `.indie-sprint.json` at the project root (or trigger it via the [planned L2.4 PostToolUse hook](HARNESS-TODO.md)). Use [`schemas/example.indie-sprint.json`](schemas/example.indie-sprint.json) as a starting point — see [`schemas/README.md`](schemas/README.md).
+After running indie-planner once, manually create `.indie-sprint.json` at the project root (or trigger it via the [planned T1.L2.4 PostToolUse hook](ROADMAP.md)). Use [`schemas/example.indie-sprint.json`](schemas/example.indie-sprint.json) as a starting point — see [`schemas/README.md`](schemas/README.md).
 
 ---
 
@@ -155,6 +155,7 @@ indie-maker/
 ├── skills/indie-*/                 ← 14 sprint skills (source of truth)
 ├── knowledge/                      ← reference docs read by skills
 ├── projects/                       ← your sprint projects (gitignored)
-├── HARNESS-TODO.md                 ← improvement roadmap (L0–L5)
+├── ROADMAP.md                      ← unified roadmap (Track 1 harness L0–L5 + Track 2 agent-runtime M1–M5)
+├── docs/agent-runtime/             ← agent runtime layer spec (Track 2 베이스)
 └── CLAUDE.md                       ← project instructions for Claude
 ```
