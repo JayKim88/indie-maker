@@ -17,91 +17,54 @@ A Claude Code skill system that automates the cognitive work of each sprint phas
 
 ## System Architecture (한눈에 보기)
 
-The whole framework in one picture — how commands, skills, sub-agents, knowledge, and outputs connect.
+5-layer architecture. Read top-to-bottom: who triggers, who runs, what they consult, who they delegate to, what gets produced.
 
 ```mermaid
 flowchart TB
-    classDef cmd fill:#fff3e0,stroke:#e65100,color:#000
-    classDef skill fill:#e3f2fd,stroke:#1565c0,color:#000
-    classDef sub fill:#f3e5f5,stroke:#6a1b9a,color:#000
-    classDef know fill:#e8f5e9,stroke:#2e7d32,color:#000
-    classDef out fill:#fce4ec,stroke:#ad1457,color:#000
+    classDef cmd fill:#fff3e0,stroke:#e65100,color:#000,font-size:14px
+    classDef skill fill:#e3f2fd,stroke:#1565c0,color:#000,font-size:14px
+    classDef sub fill:#f3e5f5,stroke:#6a1b9a,color:#000,font-size:14px
+    classDef know fill:#e8f5e9,stroke:#2e7d32,color:#000,font-size:14px
+    classDef out fill:#fce4ec,stroke:#ad1457,color:#000,font-size:14px
 
     U([👤 User])
 
-    subgraph CMD["⚡ Commands (.claude/commands/) — utility entry points"]
-        direction LR
-        S["/indie-status<br/>sprint state +<br/>next action"]:::cmd
-        R["/indie-resume<br/>auto-resume<br/>latest project"]:::cmd
-    end
+    ENTRY["⚡ Entry Points<br/><br/>Commands (read-only)<br/>• /indie-status<br/>• /indie-resume<br/><br/>Skill triggers (14)<br/>• /indie-planner, /indie-ux, ...<br/>• natural-language triggers"]:::cmd
 
-    subgraph SKILLS["🤖 14 Skills (one agent per sprint phase)"]
-        direction LR
-        subgraph S1[" "]
-            Max[Max<br/>market-researcher<br/>D-1]:::skill
-            Reid[Reid<br/>planner<br/>D1]:::skill
-            Kai[Kai<br/>ux<br/>D1pm]:::skill
-            Vera[Vera<br/>designer<br/>D2]:::skill
-            Finn[Finn<br/>monetize<br/>D2-3]:::skill
-            Arch[Arch<br/>architect<br/>D3]:::skill
-            Rex[Rex<br/>frontend<br/>D3-6]:::skill
-        end
-        subgraph S2[" "]
-            Axel[Axel<br/>backend<br/>D3-6]:::skill
-            Sam[Sam<br/>infra<br/>D6+D14]:::skill
-            Cal[Cal<br/>copy<br/>D7]:::skill
-            Leo[Leo<br/>launcher<br/>D7-13]:::skill
-            Nova[Nova<br/>analyst<br/>D21-29]:::skill
-            Gio[Gio<br/>growth<br/>D30+]:::skill
-            Sage[Sage<br/>retro<br/>D29 Kill]:::skill
-        end
-    end
+    SKILLS["🤖 14 Skills — stateful agents, one per sprint phase<br/><br/>D-1: Max (research)<br/>D1: Reid (plan) → Kai (ux)<br/>D2-3: Vera (design) · Finn (monetize) · Arch (architect)<br/>D3-6: Rex (frontend) · Axel (backend) · Sam (infra)<br/>D7-13: Cal (copy) · Leo (launcher)<br/>D21-29: Nova (analyst, Kill/Go gate)<br/>D30+: Gio (growth, Go) · Sage (retro, Kill)"]:::skill
 
-    subgraph SUB["🧩 Sub-agents (.claude/agents/) — parallel helpers"]
-        direction LR
-        CR[competitor-<br/>researcher<br/><i>parallel WebSearch</i>]:::sub
-        MCW[multi-channel-<br/>writer<br/><i>per-channel copy</i>]:::sub
-        EC[evidence-<br/>collector<br/><i>raw user quotes</i>]:::sub
-    end
+    KB["📚 Knowledge (knowledge/)<br/><br/>Core guides — default stack (Supabase + Next.js)<br/>Agent constitutions — per-agent intelligence<br/>Senior reference — non-default stack (NestJS, RN)"]:::know
 
-    subgraph KB["📚 Knowledge (knowledge/)"]
-        direction LR
-        CG[Core guides<br/>frontend / backend /<br/>design / infra]:::know
-        AC[Agent constitutions<br/>founding-pm / market /<br/>analytics / full-stack-*]:::know
-        SR[Senior reference<br/>NestJS / React Native /<br/>1700+ lines]:::know
-    end
+    SUB["🧩 Sub-agents — parallel helpers spawned BY skills<br/><br/>competitor-researcher ← Max · Reid Q3 · Finn<br/>multi-channel-writer ← Cal (4 channels) · Leo<br/>evidence-collector ← Max · Reid · Nova"]:::sub
 
-    subgraph OUT["📄 Outputs"]
-        direction LR
-        D1[docs/indie-*/*.md<br/><i>per-phase artifacts</i>]:::out
-        D2[.indie-sprint.json<br/><i>state machine</i>]:::out
-    end
+    OUT["📄 Outputs<br/><br/>docs/indie-*/*.md — per-phase artifacts<br/>.indie-sprint.json — sprint state machine"]:::out
 
-    U -->|"slash / trigger phrase"| CMD
-    U -->|"slash / trigger phrase"| SKILLS
-
-    CMD -.->|"read state"| D2
-
-    KB -->|"loaded at start"| SKILLS
-
-    Max -.->|spawns parallel| EC
-    Max -.->|spawns parallel| CR
-    Reid -.->|spawns parallel<br/>Q3 deep-dive| CR
-    Finn -.->|pricing research| CR
-    Cal -.->|4 channels in parallel| MCW
-    Leo -.->|multi-platform launch| MCW
-    Nova -.->|D29 sentiment| EC
-
-    SKILLS -->|"writes"| OUT
-    SUB -.->|"returns structured profile/copy"| SKILLS
+    U -->|slash command<br/>or trigger phrase| ENTRY
+    ENTRY ==>|invokes| SKILLS
+    KB -.->|loaded at start| SKILLS
+    SKILLS -.->|spawn N in parallel<br/>isolated context| SUB
+    SUB -.->|return structured output| SKILLS
+    SKILLS ==>|writes| OUT
+    ENTRY -.->|/indie-status reads| OUT
 ```
 
-**3-layer pattern**:
-1. **Commands** are read-only utility entry points — they answer "where am I?" and "what's next?" without modifying state.
-2. **Skills** are stateful conversational agents — one per sprint phase. They own the artifact for that phase.
-3. **Sub-agents** are isolated parallel workers — spawned BY skills to keep main context clean (research, content generation, evidence gathering).
+### How to read it
 
-**Why this matters**: heavy WebSearch / multi-channel copy stays inside sub-agent contexts, so the calling skill's conversation stays focused on the user's decisions, not raw search dumps.
+| Layer | Role | Lives in |
+|-------|------|----------|
+| ⚡ **Entry Points** | Where the user starts. Commands are read-only utilities; skill triggers start conversational agents. | `.claude/commands/` + skill `trigger_phrases` |
+| 🤖 **Skills** (14) | Stateful conversational agents, one per sprint phase. Own the artifact for that phase. | `skills/<name>/SKILL.md` |
+| 📚 **Knowledge** | Reference docs loaded into skill context at start (best practices, frameworks, agent constitutions). | `knowledge/` |
+| 🧩 **Sub-agents** | Isolated parallel workers spawned by skills for heavy WebSearch / multi-channel content / evidence gathering. Main skill's context stays clean. | `.claude/agents/` |
+| 📄 **Outputs** | Markdown artifacts per phase + sprint state JSON tracked by hooks. | `docs/indie-*/` + `.indie-sprint.json` |
+
+### Key arrows
+
+- **Solid ⇒** = synchronous (skill writes file, command invokes skill)
+- **Dashed ⇢** = async or non-blocking (sub-agent spawn returns later; knowledge load happens once)
+- **Sub-agents return TO the calling skill** — they don't write outputs themselves; the skill merges and writes
+
+**Why this matters**: heavy work (5 competitor WebSearches, 4-channel copy generation) runs in sub-agent contexts. The calling skill's main conversation stays focused on user decisions, not raw search dumps. Parallel dispatch = 2-5x speedup on multi-target work.
 
 ---
 
