@@ -3,6 +3,9 @@ project-ideas
 projects/*
 .DS_Store
 
-# .claude/ — ignore user-local config but track the harness template
+# .claude/ — ignore user-local config but track shared workflow assets
 .claude/*
 !.claude/settings.template.json
+!.claude/agents/
+!.claude/commands/
+.claude/settings.local.json

@@ -196,6 +196,8 @@ gantt
 
 ## Knowledge Base
 
+### Core guides (referenced by SKILLs — default stack: Supabase + Next.js)
+
 | Document                      | Content                                                     |
 | ----------------------------- | ----------------------------------------------------------- |
 | `knowledge/design-guide.md`   | Design system, WCAG AA, 8px grid, Atomic Design             |
@@ -204,6 +206,50 @@ gantt
 | `knowledge/infra-guide.md`    | Vercel, 12-Factor App, security hardening, observability    |
 | `knowledge/automate-guide.md` | Email drip (Resend + pg_cron), Stripe webhooks, MRR view    |
 | `knowledge/tech-stack.md`     | Canonical stack constraints — do not deviate without reason |
+
+### Agent constitutions (extended intelligence per agent)
+
+| Document                              | Used by | Content                                                          |
+| ------------------------------------- | ------- | ---------------------------------------------------------------- |
+| `knowledge/founding-pm-guide.md`      | Reid    | Customer Dev + Lean + JTBD frameworks, non-negotiable rules     |
+| `knowledge/market-intelligence-guide.md` | Max  | Desire-based research, demand validation, competitive analysis  |
+| `knowledge/analytics-guide.md`        | Nova    | AARRR, benchmarks, cohort analysis, growth experiment design    |
+| `knowledge/full-stack-frontend.md`    | Rex     | Animation, URL state, multi-step forms, Zustand, v0.dev prompts |
+| `knowledge/full-stack-backend.md`     | Axel    | Architecture trees, patterns library, performance, real-time    |
+| `knowledge/full-stack-designer.md`    | Vera    | CRO, psychology, brand voice, microcopy, motion, critique       |
+
+### Senior reference (non-default stack, learning use)
+
+| Document                                            | Stack                       | Purpose                                         |
+| --------------------------------------------------- | --------------------------- | ----------------------------------------------- |
+| `knowledge/senior-reference/frontend-senior-guide.md` | Indie stack (deeper)         | Senior-level frontend with Philosophy + Decision Guide  |
+| `knowledge/senior-reference/frontend-principles.md` | Next.js + RN + Apollo       | Larger-team frontend (JS fundamentals included) |
+| `knowledge/senior-reference/backend-principles.md`  | NestJS + Postgres + BullMQ  | Non-Supabase backend (e.g. Pulse) — 1,700+ lines |
+
+> SKILLs do NOT reference these; use for learning, interview prep, or non-default stack projects. See `knowledge/senior-reference/README.md`.
+
+---
+
+## Sub-agents & Commands
+
+Beyond the 14 skills, the project includes specialized sub-agents (called BY skills for parallel work) and utility commands (for sprint management).
+
+### Sub-agents (`.claude/agents/`)
+
+| Sub-agent                | Called by             | Purpose                                                                       |
+| ------------------------ | --------------------- | ----------------------------------------------------------------------------- |
+| `competitor-researcher`  | Reid, Max, Finn       | Deep-dive one competitor — returns structured profile without context bloat   |
+| `multi-channel-writer`   | Cal, Leo              | Per-channel copy generation (PH/HN/Reddit/X/email/landing) — parallel-friendly |
+| `evidence-collector`     | Max, Reid, Nova       | Raw user-voice quote collection with source URLs — no synthesis               |
+
+**Pattern**: caller builds shared brief → spawns N sub-agents in parallel → merges structured outputs.
+
+### Commands (`.claude/commands/`)
+
+| Command           | Purpose                                                                |
+| ----------------- | ---------------------------------------------------------------------- |
+| `/indie-status`   | Show sprint state across all projects + next recommended skill          |
+| `/indie-resume`   | Auto-detect most recent project, summarize where you left off, suggest next |
 
 ---
 

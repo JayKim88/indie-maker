@@ -236,59 +236,157 @@ A: [Specific time-to-value → "Working in [X] minutes" → first-value mileston
 - Subtext: risk reducer ("No credit card required", "Cancel anytime", "Free for 14 days")
 - If founding plan exists: secondary CTA for founding members
 
-### Step 3: Generate channel-posts.md
+### Step 3: Generate channel-posts.md (Parallel via multi-channel-writer)
 
-**Indie Hackers Post**
+**Strategy**: Each channel has distinct etiquette (HN ≠ Reddit ≠ Twitter). Generating them sequentially in Cal's main context is slow and prone to voice-bleeding (HN post sounding like the IH post). Solution: spawn one `multi-channel-writer` sub-agent per channel in parallel — each specializes per channel.
 
-Tone: builder-to-builder, authentic, metrics-forward. No corporate language.
+**Shared brief** (Cal builds once, passes to all sub-agents):
+```
+brief = {
+  product_name: <from idea-canvas>,
+  value_prop: <one-line from idea-canvas>,
+  target_audience: <from prd-lean>,
+  primary_cta_url: <user-provided>,
+  kill_criteria_context: <from idea-canvas>,
+  differentiator: <from idea-canvas>,
+  features_top_3: <from prd-lean>,
+}
+tone = "earnest-indie"  // confirmed in Step 1
+prior_artifacts = [
+  "docs/indie-designer/design-brief.md",  // if exists, for brand voice
+  "docs/indie-planner/idea-canvas.md",
+]
+```
+
+**Parallel dispatch — single message with 4 sub-agent calls:**
+
+```pseudocode
+Agent(
+  subagent_type="multi-channel-writer",
+  description="IH launch post",
+  prompt=f"""
+channel: indie-hackers (use 'reddit' channel playbook adapted; tone 'earnest-indie')
+brief: {brief_json}
+tone: earnest-indie
+length_hint: 300-500 words
+prior_artifacts: {prior_artifacts}
+
+Note: Indie Hackers culture = builder-to-builder, authentic, metrics-forward.
+First-person personal story. NO corporate language."""
+)
+
+Agent(
+  subagent_type="multi-channel-writer",
+  description="Reddit r/SideProject post",
+  prompt=f"""
+channel: reddit
+brief: {brief_json}
+tone: earnest-indie
+length_hint: <200 words
+
+Specify subreddit r/SideProject. Reddit rejects overt marketing — value-first."""
+)
+
+Agent(
+  subagent_type="multi-channel-writer",
+  description="HN Show HN post",
+  prompt=f"""
+channel: hacker-news
+brief: {brief_json}
+tone: earnest-indie
+length_hint: 200-400 words
+
+Technical honesty. Self-critical opener. No emoji in title."""
+)
+
+Agent(
+  subagent_type="multi-channel-writer",
+  description="X/Twitter thread",
+  prompt=f"""
+channel: twitter-thread
+brief: {brief_json}
+tone: earnest-indie
+length_hint: 5-7 tweets, each <280 chars
+
+Hook tweet must work alone. Final tweet = CTA with link."""
+)
+```
+
+**After all 4 return:**
+1. Extract content between `=== CHANNEL: {channel} ===` markers from each result
+2. Cal merges into `channel-posts.md` with section headers:
+   ```markdown
+   # Channel Posts: {product}
+
+   ## Indie Hackers
+   {extracted_ih_content}
+
+   ## Reddit r/SideProject
+   {extracted_reddit_content}
+
+   ## Hacker News (Show HN)
+   {extracted_hn_content}
+
+   ## Twitter/X Thread
+   {extracted_twitter_content}
+   ```
+3. Cal does final pass: checks cross-channel consistency (same product name, same CTA, same key claims)
+4. Flags any divergence: `⚠️ HN says "open source" but IH says "closed beta"`
+
+**Why parallel sub-agents here?**
+- 4 channels × ~3min sequential = 12 min vs ~3 min parallel
+- Each channel gets a focused agent that knows its etiquette deeply
+- Cal's main context stays clean — only the merged output, not 4 generation attempts
+- Voice doesn't bleed across channels (common issue when one model writes all 4)
+
+**Fallback**: if a sub-agent fails, Cal falls back to inline generation for that single channel using the legacy templates below.
+
+---
+
+**Legacy templates (used as fallback only if sub-agent fails):**
+
+<details>
+<summary>Indie Hackers template</summary>
 
 ```
-Title: "Show IH: [product] — [one-line outcome]" or "I built [X] because [personal problem]"
+Title: "Show IH: [product] — [one-line outcome]"
 
 Body structure:
-  P1: Hook — personal story with specific problem (reference Q1). First person.
-  P2: What I built — plain language, reference differentiation. No marketing speak.
-  P3: How it works — 3 bullets from MVP features. Each bullet = concrete action/output.
-  P4: Honest status — beta count, stage, what's working, what's not.
-  Close: Specific ask to community. "Would love feedback from [target user]"
+  P1: Hook — personal story with specific problem.
+  P2: What I built — plain language.
+  P3: How it works — 3 bullets from MVP features.
+  P4: Honest status — beta count, what's working.
+  Close: Specific ask to community.
 ```
+</details>
 
-**Reddit r/SideProject Post**
-
-Tone: casual, value-first, no hard sell. Reddit rejects overt marketing.
+<details>
+<summary>Reddit r/SideProject template</summary>
 
 ```
 Title: "I built [X] for [target] — [value prop]" (under 100 chars)
-
-Body:
-  2-3 sentences: problem → what you built → one differentiator.
-  Casual, like telling a friend. No bullet lists unless truly useful.
-  Close: "Link in comments if interested" (follow subreddit rules)
+Body: 2-3 sentences, casual. Close: "Link in comments"
 ```
+</details>
 
-**Hacker News (Show HN) Post**
-
-Tone: technical, understated, demo-focused. HN despises marketing.
+<details>
+<summary>HN Show HN template</summary>
 
 ```
 Title: "Show HN: [Product] — [what it does in plain technical terms]"
-
-Body:
-  P1: Technical problem statement (no buzzwords)
-  P2: How it works technically (stack, approach)
-  P3: What's interesting/novel about the approach
-  Close: link + "Feedback welcome"
+Body: Technical problem → approach → what's novel → feedback ask
 ```
+</details>
 
-**Twitter/X Thread (5 tweets)**
+<details>
+<summary>Twitter/X thread template</summary>
 
 ```
-Tweet 1: Hook — surprising stat or contrarian take about the problem
-Tweet 2: "Here's why [current solution] doesn't work for [target]"
-Tweet 3: "So I built [product] that [specific mechanism]"
-Tweet 4: 3 key features as one-liner bullets
-Tweet 5: CTA — "Try it: [link]" + founding plan mention if applicable
+Tweet 1: Hook
+Tweet 2-4: problem → why current fails → what you built
+Tweet 5: CTA
 ```
+</details>
 
 ### Step 4: Generate email-sequence.md
 

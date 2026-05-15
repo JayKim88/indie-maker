@@ -84,7 +84,9 @@ docs/indie-retro/lessons.md → (다음 사이클 market-researcher 자동 읽�
 
 ## Knowledge Documents
 
-Each skill references these for best practices and code patterns:
+Each skill references these for best practices and code patterns.
+
+### Core guides (default stack: Supabase + Next.js)
 
 - `knowledge/design-guide.md` — Design system, WCAG AA, 8px grid, Atomic Design
 - `knowledge/frontend-guide.md` — Next.js App Router, RSC rules, TypeScript strict, accessibility
@@ -92,6 +94,51 @@ Each skill references these for best practices and code patterns:
 - `knowledge/infra-guide.md` — Vercel, 12-Factor App, security hardening, observability
 - `knowledge/automate-guide.md` — Email drip sequences, Stripe webhooks, metrics automation (Resend + pg_cron)
 - `knowledge/tech-stack.md` — Canonical stack constraints — do not deviate without reason
+
+### Agent constitutions (extended intelligence per agent)
+
+- `knowledge/founding-pm-guide.md` — Reid's constitution (Customer Dev + Lean + JTBD + Non-Negotiable Rules)
+- `knowledge/market-intelligence-guide.md` — Max's constitution (desire-based research, demand validation)
+- `knowledge/analytics-guide.md` — Nova's reference (AARRR framework, benchmarks, cohort analysis)
+- `knowledge/full-stack-frontend.md` — Rex's pattern library (animation, URL state, Zustand, v0.dev)
+- `knowledge/full-stack-backend.md` — Axel's pattern library (architecture trees, real-time, performance)
+- `knowledge/full-stack-designer.md` — Vera's pattern library (CRO, psychology, microcopy, motion)
+
+### Senior reference (`knowledge/senior-reference/` — NOT used by SKILLs)
+
+These documents are preserved as senior-level reference and for non-default stacks.
+**Do NOT reference them from SKILL execution.** Use them for:
+- Non-default stack projects (e.g., Pulse on NestJS → `backend-principles.md`)
+- Senior learning / interview prep
+- Decision rationale beyond recipe-style guides
+
+Files: `frontend-senior-guide.md`, `frontend-principles.md`, `backend-principles.md`. See `senior-reference/README.md` for reactivation criteria.
+
+---
+
+## Sub-agents (project-level, `.claude/agents/`)
+
+Specialized sub-agents called BY skills to keep main context clean and enable parallel work.
+Skills spawn these in parallel via the Agent tool — each runs in an isolated context window.
+
+| Sub-agent | Called by | Purpose |
+|-----------|-----------|---------|
+| `competitor-researcher` | Reid (Q3), Max, Finn | Deep-dive one competitor; returns structured profile without bloating caller's context |
+| `multi-channel-writer` | Cal, Leo | Generate copy for ONE channel (PH/HN/Reddit/X/email/landing); spawn in parallel for multi-channel |
+| `evidence-collector` | Max, Reid, Nova | Collect raw user-voice quotes (Reddit/YouTube/G2) with source URLs — no synthesis |
+
+**Pattern**: Caller skill builds shared brief → spawns N sub-agents in single message (parallel) → merges structured outputs.
+
+**When NOT to use**: interview-style turns (Reid Q1-Q5), small lookups, anything that needs conversation continuity.
+
+## Slash Commands (project-level, `.claude/commands/`)
+
+Utility commands separate from skills. Read-only and stateless.
+
+| Command | Purpose |
+|---------|---------|
+| `/indie-status` | Show sprint status across all projects; identify stalled sprints; show next recommended skill |
+| `/indie-resume` | Resume the most recently active project with context summary before invoking next skill |
 
 ---
 

@@ -331,7 +331,7 @@ Est. ARPU range: {wtp.arpu_range}
 
 ```pseudocode
 if research.competitive.found:
-  // SKIP this question
+  // SKIP this question — prior /indie-market-researcher output exists
   print("""
 Found competitor data in ./docs/indie-market-researcher/competitive-analysis.md.
 Skipping this question — I'll use the research data directly.
@@ -343,11 +343,60 @@ else:
   ask("""
 How are people currently solving this problem?
 Tell me if there are similar tools or services.
-(If you say there are none, we'll research together.)
+(If you say there are none, I'll research with you using the competitor-researcher sub-agent.)
   """)
+
+  // ── Extract competitor names from natural-language answer ───────────────
+  // The LLM (Reid) extracts competitor mentions. User answers like
+  // "Notion 같은 거랑 Slack도 비슷해" should yield ["Notion", "Slack"].
+  user_competitors = extract_competitor_names(user_answer)
+
+  // ── Confirm BEFORE spawning sub-agents (avoid wasted API calls on misparses) ──
+  if len(user_competitors) > 0:
+    print(f"""
+    I'll research these competitors:
+    {bulleted_list(user_competitors)}
+
+    Confirm or correct? (Reply 'yes' to proceed, or list the actual names.)
+    """)
+    wait_for_user_confirmation()
+    user_competitors = updated_list_after_user_correction()
+
+  // ── Parallel deep-dive via competitor-researcher sub-agent ────────────────
+  // Triggers when user names 2+ competitors OR explicitly asks "research them"
+  if len(user_competitors) >= 2 OR user_requested_research:
+    print(f"Spawning {len(user_competitors)} competitor-researcher sub-agents in parallel...")
+
+    // Spawn ONE sub-agent per competitor in a single message — runs in parallel
+    // Each returns a structured profile WITHOUT polluting Reid's main context
+    for competitor in user_competitors:
+      Agent(
+        subagent_type="competitor-researcher",
+        description=f"Deep-dive {competitor.name}",
+        prompt=f"""Research this competitor for indie-planner Q3 analysis.
+
+competitor_name: {competitor.name}
+competitor_url: {competitor.url or "find via search"}
+our_angle: {one_line_value_prop_from_q1}
+depth: "standard"
+
+Return the structured profile per the agent's output format."""
+      )
+
+    // Wait for all sub-agents to return, then synthesize
+    competitor_profiles = await_all_results()
+
+    // Reid synthesizes into a short comparison table (not raw profiles)
+    print(competitor_comparison_table(competitor_profiles))
 ```
 
 *Analysis: Check for an angle that no existing solution covers perfectly*
+
+**Why parallel sub-agents here?**
+- Each competitor needs 3-5 WebSearch/WebFetch calls — doing this sequentially in Reid's main context bloats the conversation.
+- The sub-agent returns ONLY the structured profile; raw search results stay isolated.
+- Parallel dispatch = ~2-5x faster than sequential research.
+- Falls back gracefully: if a sub-agent fails, Reid notes `[INCOMPLETE]` and continues.
 
 **Q4: Differentiation**
 
