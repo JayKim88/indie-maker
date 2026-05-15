@@ -15,6 +15,96 @@ A Claude Code skill system that automates the cognitive work of each sprint phas
 
 ---
 
+## System Architecture (한눈에 보기)
+
+The whole framework in one picture — how commands, skills, sub-agents, knowledge, and outputs connect.
+
+```mermaid
+flowchart TB
+    classDef cmd fill:#fff3e0,stroke:#e65100,color:#000
+    classDef skill fill:#e3f2fd,stroke:#1565c0,color:#000
+    classDef sub fill:#f3e5f5,stroke:#6a1b9a,color:#000
+    classDef know fill:#e8f5e9,stroke:#2e7d32,color:#000
+    classDef out fill:#fce4ec,stroke:#ad1457,color:#000
+
+    U([👤 User])
+
+    subgraph CMD["⚡ Commands (.claude/commands/) — utility entry points"]
+        direction LR
+        S["/indie-status<br/>sprint state +<br/>next action"]:::cmd
+        R["/indie-resume<br/>auto-resume<br/>latest project"]:::cmd
+    end
+
+    subgraph SKILLS["🤖 14 Skills (one agent per sprint phase)"]
+        direction LR
+        subgraph S1[" "]
+            Max[Max<br/>market-researcher<br/>D-1]:::skill
+            Reid[Reid<br/>planner<br/>D1]:::skill
+            Kai[Kai<br/>ux<br/>D1pm]:::skill
+            Vera[Vera<br/>designer<br/>D2]:::skill
+            Finn[Finn<br/>monetize<br/>D2-3]:::skill
+            Arch[Arch<br/>architect<br/>D3]:::skill
+            Rex[Rex<br/>frontend<br/>D3-6]:::skill
+        end
+        subgraph S2[" "]
+            Axel[Axel<br/>backend<br/>D3-6]:::skill
+            Sam[Sam<br/>infra<br/>D6+D14]:::skill
+            Cal[Cal<br/>copy<br/>D7]:::skill
+            Leo[Leo<br/>launcher<br/>D7-13]:::skill
+            Nova[Nova<br/>analyst<br/>D21-29]:::skill
+            Gio[Gio<br/>growth<br/>D30+]:::skill
+            Sage[Sage<br/>retro<br/>D29 Kill]:::skill
+        end
+    end
+
+    subgraph SUB["🧩 Sub-agents (.claude/agents/) — parallel helpers"]
+        direction LR
+        CR[competitor-<br/>researcher<br/><i>parallel WebSearch</i>]:::sub
+        MCW[multi-channel-<br/>writer<br/><i>per-channel copy</i>]:::sub
+        EC[evidence-<br/>collector<br/><i>raw user quotes</i>]:::sub
+    end
+
+    subgraph KB["📚 Knowledge (knowledge/)"]
+        direction LR
+        CG[Core guides<br/>frontend / backend /<br/>design / infra]:::know
+        AC[Agent constitutions<br/>founding-pm / market /<br/>analytics / full-stack-*]:::know
+        SR[Senior reference<br/>NestJS / React Native /<br/>1700+ lines]:::know
+    end
+
+    subgraph OUT["📄 Outputs"]
+        direction LR
+        D1[docs/indie-*/*.md<br/><i>per-phase artifacts</i>]:::out
+        D2[.indie-sprint.json<br/><i>state machine</i>]:::out
+    end
+
+    U -->|"slash / trigger phrase"| CMD
+    U -->|"slash / trigger phrase"| SKILLS
+
+    CMD -.->|"read state"| D2
+
+    KB -->|"loaded at start"| SKILLS
+
+    Max -.->|spawns parallel| EC
+    Max -.->|spawns parallel| CR
+    Reid -.->|spawns parallel<br/>Q3 deep-dive| CR
+    Finn -.->|pricing research| CR
+    Cal -.->|4 channels in parallel| MCW
+    Leo -.->|multi-platform launch| MCW
+    Nova -.->|D29 sentiment| EC
+
+    SKILLS -->|"writes"| OUT
+    SUB -.->|"returns structured profile/copy"| SKILLS
+```
+
+**3-layer pattern**:
+1. **Commands** are read-only utility entry points — they answer "where am I?" and "what's next?" without modifying state.
+2. **Skills** are stateful conversational agents — one per sprint phase. They own the artifact for that phase.
+3. **Sub-agents** are isolated parallel workers — spawned BY skills to keep main context clean (research, content generation, evidence gathering).
+
+**Why this matters**: heavy WebSearch / multi-channel copy stays inside sub-agent contexts, so the calling skill's conversation stays focused on the user's decisions, not raw search dumps.
+
+---
+
 ## Full Sprint Map
 
 ```mermaid
