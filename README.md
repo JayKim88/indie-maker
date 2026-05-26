@@ -345,6 +345,8 @@ Beyond the 14 skills, the project includes specialized sub-agents (called BY ski
 
 ## Reference
 
+- [`ROADMAP.md`](ROADMAP.md) — Release milestones (v0.1 → v0.2 → v0.3)
+- [`docs/exec-plans/active/`](docs/exec-plans/active/) — Active execution plans (work in progress)
 - [`indie-sprint-playbook.md`](indie-sprint-playbook.md) — Detailed phase-by-phase playbook
 - [`CLAUDE.md`](CLAUDE.md) — Skill scope and system instructions
 - [`knowledge/`](knowledge/) — Technical reference documents
